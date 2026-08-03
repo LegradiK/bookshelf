@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Choose a theme{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Pick your theme</h1>
+<p class="page-subtitle">You can change this any time.</p>
+
+<div class="theme-grid">
+  <form method="post">
+    <input type="hidden" name="theme" value="dragons">
+    <button type="submit" class="theme-card theme-card-dragons {% if current_theme == 'dragons' %}selected{% endif %}">
+      <span class="theme-card-icon"></span>
+      <span class="theme-card-title">Dragons and knights</span>
+      <span class="theme-card-subtitle">Bold red and blue</span>
+    </button>
+  </form>
+
+  <form method="post">
+    <input type="hidden" name="theme" value="unicorns">
+    <button type="submit" class="theme-card theme-card-unicorns {% if current_theme == 'unicorns' %}selected{% endif %}">
+      <span class="theme-card-icon"></span>
+      <span class="theme-card-title">Princesses and unicorns</span>
+      <span class="theme-card-subtitle">Magical pink and purple</span>
+    </button>
+  </form>
+</div>
+{% endblock %}

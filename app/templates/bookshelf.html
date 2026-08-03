@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}My Bookshelf{% endblock %}
+
+{% block content %}
+<div class="filter-tabs">
+  <a href="{{ url_for('library.bookshelf', status='all') }}" class="tab {% if active_status == 'all' %}active{% endif %}">All books</a>
+  <a href="{{ url_for('library.bookshelf', status='reading') }}" class="tab {% if active_status == 'reading' %}active{% endif %}">Reading now</a>
+  <a href="{{ url_for('library.bookshelf', status='finished') }}" class="tab {% if active_status == 'finished' %}active{% endif %}">Finished</a>
+  <a href="{{ url_for('library.bookshelf', status='want_to_read') }}" class="tab {% if active_status == 'want_to_read' %}active{% endif %}">Want to read</a>
+</div>
+
+{% if books %}
+<div class="book-grid">
+  {% for book in books %}
+  <a href="{{ url_for('library.book_detail', book_id=book.id) }}" class="book-card">
+    <div class="book-cover">
+      {% if book.cover_url %}
+        <img src="{{ book.cover_url }}" alt="Cover of {{ book.title }}">
+      {% else %}
+        <div class="book-cover-placeholder">{{ book.title[:1] }}</div>
+      {% endif %}
+      {% if book.status == 'finished' and book.times_read > 1 %}
+        <span class="reread-badge">Read {{ book.times_read }}&times;</span>
+      {% endif %}
+    </div>
+    <p class="book-title">{{ book.title }}</p>
+    <p class="book-author">{{ book.author }}</p>
+    {% if book.average_stars %}
+      <p class="book-stars">{% for i in range(book.average_stars|round(0, 'floor')|int) %}&#9733;{% endfor %}</p>
+    {% endif %}
+    <span class="status-pill status-{{ book.status }}">
+      {% if book.status == 'reading' %}Reading now
+      {% elif book.status == 'finished' %}Finished
+      {% else %}Want to read{% endif %}
+    </span>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <p class="empty-title">No books here yet</p>
+  <p class="empty-body">Add a book to start filling your shelf.</p>
+  <a href="{{ url_for('library.search_page') }}" class="btn-primary">+ Add a book</a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Add a book{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Find a book</h1>
+<p class="page-subtitle">Type a title or author to search.</p>
+
+<input type="text" id="search-input" class="search-box" placeholder="Try 'The Gruffalo' or 'Julia Donaldson'" autocomplete="off">
+
+<div id="search-status" class="search-status"></div>
+<div id="search-results" class="search-results"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  initBookSearch();
+</script>
+{% endblock %}

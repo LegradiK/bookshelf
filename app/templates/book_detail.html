@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}{{ book.title }}{% endblock %}
+
+{% block content %}
+<div class="detail-layout">
+  <div class="detail-cover">
+    {% if book.cover_url %}
+      <img src="{{ book.cover_url }}" alt="Cover of {{ book.title }}">
+    {% else %}
+      <div class="book-cover-placeholder large">{{ book.title[:1] }}</div>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('library.update_status', book_id=book.id) }}" class="status-form">
+      <select name="status" onchange="this.form.submit()">
+        <option value="want_to_read" {% if book.status == 'want_to_read' %}selected{% endif %}>Want to read</option>
+        <option value="reading" {% if book.status == 'reading' %}selected{% endif %}>Reading now</option>
+        <option value="finished" {% if book.status == 'finished' %}selected{% endif %}>Finished</option>
+      </select>
+    </form>
+  </div>
+
+  <div class="detail-info">
+    <h1 class="detail-title">{{ book.title }}</h1>
+    <p class="detail-author">{{ book.author }}</p>
+
+    {% if book.times_read %}
+      <p class="times-read">Read {{ book.times_read }} time{{ 's' if book.times_read != 1 }}</p>
+    {% endif %}
+
+    <button type="button" class="btn-primary" onclick="document.getElementById('log-form').classList.toggle('open')">
+      + Log a reading
+    </button>
+
+    <form id="log-form" class="log-form" method="post" action="{{ url_for('library.log_reading', book_id=book.id) }}">
+      <label>Date read
+        <input type="date" name="date_read" value="{{ today }}">
+      </label>
+
+      <label>How many stars?
+        <div class="star-picker">
+          {% for i in range(1, 6) %}
+          <label class="star-option">
+            <input type="radio" name="stars" value="{{ i }}">
+            <span>&#9733;</span>
+          </label>
+          {% endfor %}
+        </div>
+      </label>
+
+      <label>What did you think? (optional)
+        <textarea name="review" rows="3" placeholder="I liked the part where..."></textarea>
+      </label>
+
+      <button type="submit" class="btn-primary">Save reading</button>
+    </form>
+
+    {% if book.logs %}
+    <div class="log-history">
+      <h2>Reading history</h2>
+      {% for log in book.logs %}
+      <div class="log-entry">
+        <div class="log-entry-header">
+          <span class="log-date">{{ log.date_read.strftime('%d %b %Y') }}</span>
+          {% if log.stars %}
+            <span class="log-stars">{% for i in range(log.stars) %}&#9733;{% endfor %}</span>
+          {% endif %}
+        </div>
+        {% if log.review %}
+          <p class="log-review">{{ log.review }}</p>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('library.delete_book', book_id=book.id) }}" class="delete-form"
+          onsubmit="return confirm('Remove this book from your shelf?');">
+      <button type="submit" class="btn-text-danger">Remove from shelf</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

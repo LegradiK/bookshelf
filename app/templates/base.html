@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="{{ current_theme }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}My Bookshelf{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <header class="site-header">
+    <a href="{{ url_for('library.bookshelf') }}" class="logo">
+      <span class="logo-icon"></span>
+      My Bookshelf
+    </a>
+    <nav class="site-nav">
+      <a href="{{ url_for('library.bookshelf') }}">Bookshelf</a>
+      <a href="{{ url_for('library.search_page') }}" class="nav-cta">+ Add a book</a>
+      <a href="{{ url_for('library.theme_picker') }}" class="theme-link" title="Change theme">Theme</a>
+    </nav>
+  </header>
+
+  <main class="page">
+    {% block content %}{% endblock %}
+  </main>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
