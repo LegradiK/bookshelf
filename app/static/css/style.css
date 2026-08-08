@@ -7,6 +7,12 @@
   --surface: #FFFFFF;
   --text-primary: #2C2C2A;
   --text-secondary: #6b6a66;
+  --primary: #6b6a66;
+  --primary-dark: #2C2C2A;
+  --secondary: #999999;
+  --secondary-dark: #555555;
+  --tint: #eeeeee;
+  --tint-secondary: #f5f5f5;
 }
 
 [data-theme="dragons"] {
@@ -25,11 +31,6 @@
   --secondary-dark: #3C3489;
   --tint: #FBEAF0;
   --tint-secondary: #EEEDFE;
-}
-
-.page-bg {
-  width: 100%;
-  min-height: calc(100vh - 64px);
 }
 
 /* ---------- Theme backgrounds ---------- */
@@ -57,15 +58,23 @@
   z-index: 1;
 }
 
+.page-bg {
+  flex: 1;
+  width: 100%;
+}
+
 /* ---------- Base ---------- */
 * { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+}
 
 body {
   margin: 0;
   font-family: var(--font-body);
   background: var(--bg-page);
   color: var(--text-primary);
-  padding-bottom: 60px;
 }
 
 a { text-decoration: none; color: inherit; }
@@ -78,6 +87,12 @@ a { text-decoration: none; color: inherit; }
   padding: 1rem 1.5rem;
   background: var(--surface);
   border-bottom: 3px solid var(--primary);
+}
+
+.site-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 .logo {
@@ -127,6 +142,11 @@ a { text-decoration: none; color: inherit; }
   max-width: 960px;
   margin: 0 auto;
   padding: 2rem 1.5rem 4rem;
+}
+
+.page-bg {
+  flex: 1;
+  width: 100%;
 }
 
 .page-title {
@@ -253,9 +273,16 @@ a { text-decoration: none; color: inherit; }
 .empty-state {
   text-align: center;
   padding: 3rem 1rem;
-  background: var(--surface);
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.75); /* fallback for no theme selected */
   border-radius: var(--radius);
+}
+
+[data-theme="dragons"] .empty-state {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+[data-theme="unicorns"] .empty-state {
+  background: rgba(255, 255, 255, 0.45);
 }
 
 .empty-title { font-family: var(--font-display); font-size: 20px; margin: 0 0 0.25rem; }
@@ -504,17 +531,12 @@ a { text-decoration: none; color: inherit; }
 
 /* ---------- footer ---------- */
 .footer {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
   text-align: center;
-  color: var(--ink-soft);
+  color: var(--text-secondary);
   font-size: 0.95rem;
   padding: 0.8rem 1.2rem;
-  background: var(--panel);
-  border-top: 3px solid var(--line);
-  z-index: 2;
+  background: var(--surface);
+  border-top: 3px solid var(--primary);
 }
 
 

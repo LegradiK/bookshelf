@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="{{ current_theme }}">
+<html lang="en" data-theme="{% block html_theme %}{{ current_theme }}{% endblock %}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,31 +9,34 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-  <header class="site-header">
-    <a href="{{ url_for('library.bookshelf') }}" class="logo">
-      <span class="logo-icon"></span>
-      My Bookshelf
-    </a>
-    <nav class="site-nav">
-      <a href="{{ url_for('library.bookshelf') }}">Bookshelf</a>
-      <a href="{{ url_for('library.search_page') }}" class="nav-cta">+ Add a book</a>
-      <a href="{{ url_for('library.theme_picker') }}" class="theme-link" title="Change theme">Theme</a>
-    </nav>
-  </header>
+  <div class="site-wrapper">
+    <header class="site-header">
+      <a href="{{ url_for('library.bookshelf') }}" class="logo">
+        <span class="logo-icon"></span>
+        My Bookshelf
+      </a>
+      <nav class="site-nav">
+        <a href="{{ url_for('library.bookshelf') }}">Bookshelf</a>
+        <a href="{{ url_for('library.search_page') }}" class="nav-cta">+ Add a book</a>
+        <a href="{{ url_for('library.theme_picker') }}" class="theme-link" title="Change theme">Theme</a>
+      </nav>
+    </header>
 
-  <div class="page-bg" data-theme-bg>
-    <main class="page">
-      {% block content %}{% endblock %}
-    </main>
+    <div class="page-bg" data-theme-bg>
+      <main class="page">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block scripts %}{% endblock %}
+
+    <footer class="footer">
+      Learning Hub for KS1 Children &copy;2026 by
+      <a href="https://github.com/LegradiK" target="_blank" rel="noopener noreferrer">LegradiK</a>
+      All rights reserved.
+    </footer>
   </div>
-  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-  {% block scripts %}{% endblock %}
-</body>
 
-<footer class="footer">
-  Learning Hub for KS1 Children &copy;2026 by
-  <a href="https://github.com/LegradiK" target="_blank" rel="noopener noreferrer">LegradiK</a>
-  All rights reserved.
-</footer>
+</body>
 
 </html>

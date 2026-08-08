@@ -10,7 +10,7 @@
       <div class="book-cover-placeholder large">{{ book.title[:1] }}</div>
     {% endif %}
 
-    <form method="post" action="{{ url_for('library.update_status', book_id=book.id) }}" class="status-form">
+    <form method="post" action="{{ url_for('books.update_status', book_id=book.id) }}" class="status-form">
       <select name="status" onchange="this.form.submit()">
         <option value="want_to_read" {% if book.status == 'want_to_read' %}selected{% endif %}>Want to read</option>
         <option value="reading" {% if book.status == 'reading' %}selected{% endif %}>Reading now</option>
@@ -31,7 +31,7 @@
       + Log a reading
     </button>
 
-    <form id="log-form" class="log-form" method="post" action="{{ url_for('library.log_reading', book_id=book.id) }}">
+    <form id="log-form" class="log-form" method="post" action="{{ url_for('books.log_reading', book_id=book.id) }}">
       <label>Date read
         <input type="date" name="date_read" value="{{ today }}">
       </label>
@@ -73,7 +73,7 @@
     </div>
     {% endif %}
 
-    <form method="post" action="{{ url_for('library.delete_book', book_id=book.id) }}" class="delete-form"
+    <form method="post" action="{{ url_for('books.delete_book', book_id=book.id) }}" class="delete-form"
           onsubmit="return confirm('Remove this book from your shelf?');">
       <button type="submit" class="btn-text-danger">Remove from shelf</button>
     </form>
