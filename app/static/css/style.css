@@ -27,42 +27,32 @@
   --tint-secondary: #EEEDFE;
 }
 
+.page-bg {
+  width: 100%;
+  min-height: calc(100vh - 64px);
+}
+
 /* ---------- Theme backgrounds ---------- */
-[data-theme="dragons"] body {
+[data-theme="dragons"] .page-bg {
   background-image:
     linear-gradient(rgba(251, 249, 244, 0.88), rgba(251, 249, 244, 0.88)),
-    url("/static/img/theme-dragon-bg.svg");
-  background-size: cover;
+    url("/static/img/dragon-with-knight.svg");
+  background-size: auto, contain;
   background-position: center top;
-  background-attachment: fixed;
-}
-
-[data-theme="unicorns"] body {
-  background-image:
-    linear-gradient(rgba(251, 249, 244, 0.88), rgba(251, 249, 244, 0.88)),
-    url("/static/img/theme-unicorn-bg.png");
-  background-size: cover;
-  background-position: center top;
-  background-attachment: fixed;
-  position: relative;
-}
-
-[data-theme="unicorns"] body::after {
-  content: "";
-  position: fixed;
-  top: 4%;
-  right: 3%;
-  width: 160px;
-  height: 160px;
-  background-image: url("/static/img/theme-fairy.png");
-  background-size: contain;
   background-repeat: no-repeat;
-  pointer-events: none;
-  z-index: 0;
+}
+
+[data-theme="unicorns"] .page-bg {
+  background-image:
+    linear-gradient(rgba(251, 249, 244, 0.88), rgba(251, 249, 244, 0.88)),
+    url("/static/img/unicorn.png");
+  background-size: auto, contain;
+  background-position: center top;
+  background-repeat: no-repeat;
 }
 
 .site-header,
-.page {
+.page-bg {
   position: relative;
   z-index: 1;
 }
@@ -75,6 +65,7 @@ body {
   font-family: var(--font-body);
   background: var(--bg-page);
   color: var(--text-primary);
+  padding-bottom: 60px;
 }
 
 a { text-decoration: none; color: inherit; }
@@ -263,6 +254,7 @@ a { text-decoration: none; color: inherit; }
   text-align: center;
   padding: 3rem 1rem;
   background: var(--surface);
+  background: rgba(255, 255, 255, 0.75);
   border-radius: var(--radius);
 }
 
@@ -477,7 +469,7 @@ a { text-decoration: none; color: inherit; }
 .theme-card-dragons {
   background:
     linear-gradient(rgba(230, 241, 251, 0.75), rgba(230, 241, 251, 0.75)),
-    url("/static/img/theme-dragon-bg.svg") center/cover;
+    url("/static/img/dragon-with-knight.svg") center / 100px no-repeat;
 }
 
 .theme-card-dragons .theme-card-icon { background: #1D5DA8; }
@@ -487,7 +479,7 @@ a { text-decoration: none; color: inherit; }
 .theme-card-unicorns {
   background:
     linear-gradient(rgba(251, 234, 240, 0.75), rgba(251, 234, 240, 0.75)),
-    url("/static/img/theme-unicorn-bg.png") center/cover;
+    url("/static/img/unicorn.png") center / 100px no-repeat;
 }
 
 .theme-card-unicorns .theme-card-icon { background: #D4537E; }
@@ -508,3 +500,21 @@ a { text-decoration: none; color: inherit; }
 }
 
 .theme-card-subtitle { font-size: 13px; color: var(--text-secondary); }
+
+
+/* ---------- footer ---------- */
+.footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  padding: 0.8rem 1.2rem;
+  background: var(--panel);
+  border-top: 3px solid var(--line);
+  z-index: 2;
+}
+
+

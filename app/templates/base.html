@@ -21,11 +21,19 @@
     </nav>
   </header>
 
-  <main class="page">
-    {% block content %}{% endblock %}
-  </main>
-
+  <div class="page-bg" data-theme-bg>
+    <main class="page">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
   {% block scripts %}{% endblock %}
 </body>
+
+<footer class="footer">
+  Learning Hub for KS1 Children &copy;2026 by
+  <a href="https://github.com/LegradiK" target="_blank" rel="noopener noreferrer">LegradiK</a>
+  All rights reserved.
+</footer>
+
 </html>
