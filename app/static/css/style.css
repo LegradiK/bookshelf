@@ -10,12 +10,12 @@
 }
 
 [data-theme="dragons"] {
-  --primary: #E24B4A;
-  --primary-dark: #A32D2D;
-  --secondary: #378ADD;
-  --secondary-dark: #0C447C;
-  --tint: #FCEBEB;
-  --tint-secondary: #E6F1FB;
+  --primary: #1D5DA8;
+  --primary-dark: #08325A;
+  --secondary: #E24B4A;
+  --secondary-dark: #A32D2D;
+  --tint: #E6F1FB;
+  --tint-secondary: #FCEBEB;
 }
 
 [data-theme="unicorns"] {
@@ -25,6 +25,46 @@
   --secondary-dark: #3C3489;
   --tint: #FBEAF0;
   --tint-secondary: #EEEDFE;
+}
+
+/* ---------- Theme backgrounds ---------- */
+[data-theme="dragons"] body {
+  background-image:
+    linear-gradient(rgba(251, 249, 244, 0.88), rgba(251, 249, 244, 0.88)),
+    url("/static/img/theme-dragon-bg.svg");
+  background-size: cover;
+  background-position: center top;
+  background-attachment: fixed;
+}
+
+[data-theme="unicorns"] body {
+  background-image:
+    linear-gradient(rgba(251, 249, 244, 0.88), rgba(251, 249, 244, 0.88)),
+    url("/static/img/theme-unicorn-bg.png");
+  background-size: cover;
+  background-position: center top;
+  background-attachment: fixed;
+  position: relative;
+}
+
+[data-theme="unicorns"] body::after {
+  content: "";
+  position: fixed;
+  top: 4%;
+  right: 3%;
+  width: 160px;
+  height: 160px;
+  background-image: url("/static/img/theme-fairy.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.site-header,
+.page {
+  position: relative;
+  z-index: 1;
 }
 
 /* ---------- Base ---------- */
@@ -410,6 +450,7 @@ a { text-decoration: none; color: inherit; }
 .delete-form { margin-top: 1.5rem; }
 
 /* ---------- Theme picker ---------- */
+
 .theme-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -433,8 +474,25 @@ a { text-decoration: none; color: inherit; }
   font-family: var(--font-body);
 }
 
-.theme-card-dragons { background: #FCEBEB; }
-.theme-card-unicorns { background: #FBEAF0; }
+.theme-card-dragons {
+  background:
+    linear-gradient(rgba(230, 241, 251, 0.75), rgba(230, 241, 251, 0.75)),
+    url("/static/img/theme-dragon-bg.svg") center/cover;
+}
+
+.theme-card-dragons .theme-card-icon { background: #1D5DA8; }
+
+.theme-card-dragons .theme-card-title { color: #08325A; }
+
+.theme-card-unicorns {
+  background:
+    linear-gradient(rgba(251, 234, 240, 0.75), rgba(251, 234, 240, 0.75)),
+    url("/static/img/theme-unicorn-bg.png") center/cover;
+}
+
+.theme-card-unicorns .theme-card-icon { background: #D4537E; }
+
+.theme-card-unicorns .theme-card-title { color: #72243E; }
 
 .theme-card.selected { border-color: currentColor; }
 
@@ -443,16 +501,10 @@ a { text-decoration: none; color: inherit; }
   border-radius: 50%;
 }
 
-.theme-card-dragons .theme-card-icon { background: #E24B4A; }
-.theme-card-unicorns .theme-card-icon { background: #D4537E; }
-
 .theme-card-title {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 17px;
 }
-
-.theme-card-dragons .theme-card-title { color: #791F1F; }
-.theme-card-unicorns .theme-card-title { color: #72243E; }
 
 .theme-card-subtitle { font-size: 13px; color: var(--text-secondary); }
