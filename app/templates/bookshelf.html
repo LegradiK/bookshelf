@@ -12,7 +12,7 @@
 {% if books %}
 <div class="book-grid">
   {% for book in books %}
-  <a href="{{ url_for('library.book_detail', book_id=book.id) }}" class="book-card">
+  <a href="{{ url_for('library.bookshelf', book_id=book.id) }}" class="book-card">
     <div class="book-cover">
       {% if book.cover_url %}
         <img src="{{ book.cover_url }}" alt="Cover of {{ book.title }}">

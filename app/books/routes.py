@@ -16,7 +16,7 @@ def search_api():
         return jsonify([])
 
     try:
-        params = {"q": q, "maxResults": 12}
+        params = {"q": q, "maxResults": 30}
         api_key = current_app.config.get("GOOGLE_BOOKS_API_KEY")
         if api_key:
             params["key"] = api_key
