@@ -1,5 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="{% block html_theme %}{{ current_theme }}{% endblock %}">
+<html lang="en" style="
+  --primary: {{ palette.primary }};
+  --primary-dark: {{ palette.primary_dark }};
+  --secondary: {{ palette.secondary }};
+  --secondary-dark: {{ palette.secondary_dark }};
+  --tint: {{ palette.tint }};
+  --tint-secondary: {{ palette.tint_secondary }};
+">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,27 +15,25 @@
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
+
 <body>
   <div class="site-wrapper">
     <header class="site-header">
-      <a href="{{ url_for('library.bookshelf') }}" class="logo">
+      <button type="button" class="logo logo-button" onclick="document.getElementById('colour-picker').showModal()">
         <span class="logo-icon"></span>
         My Bookshelf
-      </a>
+      </button>
       <nav class="site-nav">
         <a href="{{ url_for('library.bookshelf') }}">Bookshelf</a>
         <a href="{{ url_for('library.search_page') }}" class="nav-cta">+ Add a book</a>
-        <a href="{{ url_for('library.theme_picker') }}" class="theme-link" title="Change theme">Theme</a>
       </nav>
     </header>
 
-    <div class="page-bg" data-theme-bg>
+    <div class="page-bg">
       <main class="page">
         {% block content %}{% endblock %}
       </main>
     </div>
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-    {% block scripts %}{% endblock %}
 
     <footer class="footer">
       Learning Hub for KS1 Children &copy;2026 by
@@ -37,6 +42,32 @@
     </footer>
   </div>
 
+  <dialog id="colour-picker" class="colour-picker">
+    <form method="dialog" class="colour-picker-close-form">
+      <button type="button" class="colour-picker-close" onclick="document.getElementById('colour-picker').close()" aria-label="Close">&times;</button>
+    </form>
+    <h2 class="colour-picker-title">Choose a colour</h2>
+    {% for group in colour_groups %}
+      <p class="colour-group-label">{{ group.label }}</p>
+      <div class="colour-swatch-grid">
+        {% for swatch in group.swatches %}
+          <form method="post" action="{{ url_for('library.set_colour') }}" class="colour-swatch-form">
+            <input type="hidden" name="colour_id" value="{{ swatch.id }}">
+            <input type="hidden" name="next" value="{{ request.path }}">
+            <button type="submit" class="colour-swatch"
+                    style="background-color: {{ swatch.hex }};"
+                    title="{{ swatch.name }} — {{ swatch.brand }}"
+                    aria-label="{{ swatch.name }}, {{ swatch.brand }}">
+            </button>
+          </form>
+          <span class="colour-swatch-name">{{ swatch.name }}</span>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </dialog>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  {% block scripts %}{% endblock %}
 </body>
 
 </html>

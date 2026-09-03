@@ -42,15 +42,15 @@ class ReadingLog(db.Model):
 
 
 class Setting(db.Model):
-    """Single-row table for simple site-wide settings like the chosen theme."""
     id = db.Column(db.Integer, primary_key=True)
-    theme = db.Column(db.String(20), default=None)  # "dragons" or "unicorns"
-
-    @staticmethod
-    def get():
-        setting = Setting.query.first()
-        if not setting:
-            setting = Setting()
+    colour_hex = db.Column(db.String(7), nullable=True)  # e.g. "#C4B2A2"
+ 
+    @classmethod
+    def get(cls):
+        setting = cls.query.first()
+        if setting is None:
+            setting = cls()
             db.session.add(setting)
             db.session.commit()
         return setting
+

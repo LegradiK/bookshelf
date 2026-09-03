@@ -20,10 +20,4 @@ def create_app(config_class=Config):
     with app.app_context():
         db.create_all()
 
-    @app.context_processor
-    def inject_theme():
-        from app.models import Setting
-        setting = Setting.get()
-        return {"current_theme": setting.theme or "dragons"}
-
     return app
