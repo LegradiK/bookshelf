@@ -54,11 +54,3 @@ reading-tracker/
   — worth adding a plain form for that later.
 - No authentication — fine for a private home network, but add a password/PIN
   gate before deploying anywhere public.
-
-
-
-Image by <a href="https://pixabay.com/users/gdj-1086657/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=5273038">Gordon Johnson</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=5273038">Pixabay</a>
-
-Image by <a href="https://pixabay.com/users/silviap_design-1583911/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=3896324">Silvia</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=3896324">Pixabay</a>
-
-Image by <a href="https://pixabay.com/users/jcoope12-17392968/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=7273788">Jim Cooper</a> from <a href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=7273788">Pixabay</a>
