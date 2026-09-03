@@ -2,7 +2,7 @@ from flask import render_template, request, redirect, url_for, abort
 
 from . import library_bp
 from app.models import db, Book, Setting
-from app.colours import COLOUR_GROUPS, COLOURS_BY_ID, VALID_HEXES, DEFAULT_COLOUR_ID
+from app.colours import COLOUR_GROUPS, COLOURS_BY_ID, VALID_HEXES, DEFAULT_HEX
 from app.colour_shades import site_palette
 
 
@@ -10,7 +10,7 @@ def _current_colour_hex() -> str:
     setting = Setting.get()
     if setting.colour_hex and setting.colour_hex in VALID_HEXES:
         return setting.colour_hex
-    return COLOURS_BY_ID[DEFAULT_COLOUR_ID]["hex"]
+    return DEFAULT_HEX
 
 
 @library_bp.app_context_processor

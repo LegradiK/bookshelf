@@ -5,6 +5,7 @@ function initBookSearch() {
   if (!input) return;
 
   let debounceTimer = null;
+  let activeController = null;
 
   input.addEventListener("input", () => {
     const query = input.value.trim();
@@ -17,12 +18,21 @@ function initBookSearch() {
     }
 
     statusEl.textContent = "Searching...";
-    debounceTimer = setTimeout(() => runSearch(query), 350);
+    debounceTimer = setTimeout(() => runSearch(query), 600);
   });
 
   async function runSearch(query) {
+    // Cancel any still-in-flight request so a fast typist doesn't stack up
+    // calls against Google's rate limit.
+    if (activeController) {
+      activeController.abort();
+    }
+    activeController = new AbortController();
+
     try {
-      const res = await fetch(`/search-books?q=${encodeURIComponent(query)}`);
+      const res = await fetch(`/search-books?q=${encodeURIComponent(query)}`, {
+        signal: activeController.signal,
+      });
       const data = await res.json();
 
       if (data.error) {
@@ -39,6 +49,7 @@ function initBookSearch() {
       statusEl.textContent = `${data.length} result${data.length === 1 ? "" : "s"}`;
       resultsEl.innerHTML = data.map(renderResultCard).join("");
     } catch (err) {
+      if (err.name === "AbortError") return; // superseded by a newer search, ignore
       statusEl.textContent = "Something went wrong searching. Try again.";
     }
   }

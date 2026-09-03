@@ -1,53 +1,72 @@
 import requests
 from datetime import date
-from flask import render_template, request, redirect, url_for, jsonify
+from flask import render_template, request, redirect, url_for, jsonify, current_app
 
 from . import books_bp
-from app.models import db, Book, ReadingLog, Setting
+from app.models import db, Book, ReadingLog
 
 GOOGLE_BOOKS_API = "https://www.googleapis.com/books/v1/volumes"
 
 
-@books_bp.route("/search/api")
+@books_bp.route("/search-books")
 def search_api():
     """AJAX endpoint: search Google Books and return simplified results for the search page."""
     q = request.args.get("q", "").strip()
     if not q:
         return jsonify([])
 
-    resp = requests.get(GOOGLE_BOOKS_API, params={"q": q, "maxResults": 12}, timeout=5)
-    resp.raise_for_status()
+    try:
+        params = {"q": q, "maxResults": 12}
+        api_key = current_app.config.get("GOOGLE_BOOKS_API_KEY")
+        if api_key:
+            params["key"] = api_key
+
+        resp = requests.get(GOOGLE_BOOKS_API, params=params, timeout=5)
+        resp.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        if e.response is not None and e.response.status_code == 429:
+            return jsonify({"error": "Search is busy right now — wait a moment and try again."})
+        return jsonify({"error": "Something went wrong searching. Try again."})
+    except requests.exceptions.RequestException:
+        return jsonify({"error": "Something went wrong searching. Try again."})
+
     items = resp.json().get("items", [])
 
     results = []
     for item in items:
         info = item.get("volumeInfo", {})
         image_links = info.get("imageLinks", {})
+        published_date = info.get("publishedDate", "")
         results.append({
             "google_books_id": item.get("id"),
             "title": info.get("title", "Untitled"),
-            "authors": ", ".join(info.get("authors", [])) or "Unknown author",
+            "author": ", ".join(info.get("authors", [])) or "Unknown author",
+            "year": published_date[:4] if published_date else None,
             "cover_url": image_links.get("thumbnail"),
         })
 
     return jsonify(results)
 
 
-@books_bp.route("/add", methods=["POST"])
+@books_bp.route("/add-book", methods=["POST"])
 def add_book():
-    """Add a book found via search onto the child's shelf (default status: want_to_read)."""
+    """Add a book found via search onto the child's shelf."""
     google_books_id = request.form.get("google_books_id")
 
     existing = Book.query.filter_by(google_books_id=google_books_id).first()
     if existing:
         return redirect(url_for("books.detail", book_id=existing.id))
 
+    status = request.form.get("status", "want_to_read")
+    if status not in {"want_to_read", "reading", "finished"}:
+        status = "want_to_read"
+
     book = Book(
         google_books_id=google_books_id,
         title=request.form.get("title"),
-        author=request.form.get("authors"),
+        author=request.form.get("author"),
         cover_url=request.form.get("cover_url"),
-        status="want_to_read",
+        status=status,
     )
     db.session.add(book)
     db.session.commit()
@@ -66,7 +85,6 @@ def detail(book_id):
         logs=book.logs,
         times_read=book.times_read,
         today=date.today().isoformat(),
-        current_theme=Setting.get().theme,
     )
 
 

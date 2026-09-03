@@ -19,10 +19,12 @@
 <body>
   <div class="site-wrapper">
     <header class="site-header">
-      <button type="button" class="logo logo-button" onclick="document.getElementById('colour-picker').showModal()">
-        <span class="logo-icon"></span>
-        My Bookshelf
-      </button>
+      <div class="logo">
+        <button type="button" class="logo-icon-btn" onclick="document.getElementById('colour-picker').showModal()" aria-label="Change site colour">
+          <span class="logo-icon"></span>
+        </button>
+        <a href="{{ url_for('library.bookshelf') }}" class="logo-text">My Bookshelf</a>
+      </div>
       <nav class="site-nav">
         <a href="{{ url_for('library.bookshelf') }}">Bookshelf</a>
         <a href="{{ url_for('library.search_page') }}" class="nav-cta">+ Add a book</a>
