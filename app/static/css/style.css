@@ -148,6 +148,7 @@ a { text-decoration: none; color: inherit; }
 }
 
 .book-card {
+  position: relative;
   background: var(--surface);
   border-radius: var(--radius);
   padding: 0.75rem;
@@ -161,6 +162,12 @@ a { text-decoration: none; color: inherit; }
 .book-card:hover {
   border-color: var(--secondary);
   transform: translateY(-2px);
+}
+
+.book-card-link {
+  display: block;
+  text-decoration: inherit;
+  color: inherit;
 }
 
 .book-cover {
@@ -223,6 +230,33 @@ a { text-decoration: none; color: inherit; }
 .status-want_to_read { background: var(--tint-secondary); color: var(--secondary-dark); }
 .status-reading { background: var(--tint); color: var(--primary-dark); }
 .status-finished { background: #EAF3DE; color: #3B6D11; }
+
+.book-card-link {
+  display: block;
+  text-decoration: inherit;
+  color: inherit;
+}
+.delete-book-form {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  z-index: 1;
+}
+.delete-book-btn {
+  background: rgba(255, 255, 255, 0.85);
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  cursor: pointer;
+}
+.delete-book-btn:hover {
+  color: #c0392b;
+}
 
 /* ---------- Empty state ---------- */
 .empty-state {
@@ -525,4 +559,24 @@ a { text-decoration: none; color: inherit; }
   font-size: 11px;
   color: var(--text-secondary);
   margin-top: -0.5rem;
+}
+
+.log-entry-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.delete-log-form {
+  margin-left: auto;
+}
+.delete-log-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #999;
+  cursor: pointer;
+  display: inline-flex;
+}
+.delete-log-btn:hover {
+  color: #c0392b;
 }

@@ -3,44 +3,58 @@
 
 {% block content %}
 <div class="filter-tabs">
-  <a href="{{ url_for('library.bookshelf', status='all') }}" class="tab {% if active_status == 'all' %}active{% endif %}">All books</a>
-  <a href="{{ url_for('library.bookshelf', status='reading') }}" class="tab {% if active_status == 'reading' %}active{% endif %}">Reading now</a>
-  <a href="{{ url_for('library.bookshelf', status='finished') }}" class="tab {% if active_status == 'finished' %}active{% endif %}">Finished</a>
-  <a href="{{ url_for('library.bookshelf', status='want_to_read') }}" class="tab {% if active_status == 'want_to_read' %}active{% endif %}">Want to read</a>
+<a href="{{ url_for('library.bookshelf', status='all') }}" class="tab {% if active_status == 'all' %}active{% endif %}">All books</a>
+<a href="{{ url_for('library.bookshelf', status='reading') }}" class="tab {% if active_status == 'reading' %}active{% endif %}">Reading now</a>
+<a href="{{ url_for('library.bookshelf', status='finished') }}" class="tab {% if active_status == 'finished' %}active{% endif %}">Finished</a>
+<a href="{{ url_for('library.bookshelf', status='want_to_read') }}" class="tab {% if active_status == 'want_to_read' %}active{% endif %}">Want to read</a>
 </div>
 
 {% if books %}
 <div class="book-grid">
   {% for book in books %}
-  <a href="{{ url_for('library.bookshelf', book_id=book.id) }}" class="book-card">
-    <div class="book-cover">
+<div class="book-card">
+<form method="post" action="{{ url_for('books.delete_book', book_id=book.id) }}" class="delete-book-form"
+onsubmit="return confirm('Remove this book from your shelf?');">
+<button type="submit" class="delete-book-btn" aria-label="Remove {{ book.title }} from shelf">
+<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+<polyline points="3 6 5 6 21 6"></polyline>
+<path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+<path d="M10 11v6"></path>
+<path d="M14 11v6"></path>
+<path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+</svg>
+</button>
+</form>
+<a href="{{ url_for('books.detail', book_id=book.id) }}" class="book-card-link">
+<div class="book-cover">
       {% if book.cover_url %}
-        <img src="{{ book.cover_url }}" alt="Cover of {{ book.title }}">
+<img src="{{ book.cover_url }}" alt="Cover of {{ book.title }}">
       {% else %}
-        <div class="book-cover-placeholder">{{ book.title[:1] }}</div>
+<div class="book-cover-placeholder">{{ book.title[:1] }}</div>
       {% endif %}
       {% if book.status == 'finished' and book.times_read > 1 %}
-        <span class="reread-badge">Read {{ book.times_read }}&times;</span>
+<span class="reread-badge">Read {{ book.times_read }}&times;</span>
       {% endif %}
-    </div>
-    <p class="book-title">{{ book.title }}</p>
-    <p class="book-author">{{ book.author }}</p>
+</div>
+<p class="book-title">{{ book.title }}</p>
+<p class="book-author">{{ book.author }}</p>
     {% if book.average_stars %}
-      <p class="book-stars">{% for i in range(book.average_stars|round(0, 'floor')|int) %}&#9733;{% endfor %}</p>
+<p class="book-stars">{% for i in range(book.average_stars|round(0, 'floor')|int) %}&#9733;{% endfor %}</p>
     {% endif %}
-    <span class="status-pill status-{{ book.status }}">
+<span class="status-pill status-{{ book.status }}">
       {% if book.status == 'reading' %}Reading now
-      {% elif book.status == 'finished' %}Finished
+      {% elif book.status == 'finished' %}Finished{% if book.times_read > 1 %} &middot; {{ book.times_read }}&times;{% endif %}
       {% else %}Want to read{% endif %}
-    </span>
-  </a>
+</span>
+</a>
+</div>
   {% endfor %}
 </div>
 {% else %}
 <div class="empty-state">
-  <p class="empty-title">No books here yet</p>
-  <p class="empty-body">Add a book to start filling your shelf.</p>
-  <a href="{{ url_for('library.search_page') }}" class="btn-primary">+ Add a book</a>
+<p class="empty-title">No books here yet</p>
+<p class="empty-body">Add a book to start filling your shelf.</p>
+<a href="{{ url_for('library.search_page') }}" class="btn-primary">+ Add a book</a>
 </div>
 {% endif %}
 {% endblock %}

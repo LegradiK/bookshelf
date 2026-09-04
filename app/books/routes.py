@@ -1,5 +1,5 @@
 import requests
-from datetime import date
+from datetime import date, datetime
 from flask import render_template, request, redirect, url_for, jsonify, current_app
 
 from . import books_bp
@@ -84,7 +84,7 @@ def detail(book_id):
         book=book,
         logs=book.logs,
         times_read=book.times_read,
-        today=date.today().isoformat(),
+        today=date.today(),
     )
 
 
@@ -106,9 +106,15 @@ def log_reading(book_id):
     """Add a reading log entry: date read, star rating, optional review."""
     book = Book.query.get_or_404(book_id)
 
+    date_read_str = request.form.get("date_read")
+    if date_read_str:
+        date_read = datetime.strptime(date_read_str, "%Y-%m-%d").date()
+    else:
+        date_read = date.today()
+
     log = ReadingLog(
         book_id=book.id,
-        date_read=request.form.get("date_read") or date.today(),
+        date_read=date_read,
         stars=int(request.form.get("stars", 0)),
         review=request.form.get("review", "").strip(),
     )
@@ -119,6 +125,15 @@ def log_reading(book_id):
 
     db.session.commit()
     return redirect(url_for("books.detail", book_id=book.id))
+
+
+@books_bp.route("/<int:book_id>/log/<int:log_id>/delete", methods=["POST"])
+def delete_log(book_id, log_id):
+    """Remove a single reading log entry from a book's history."""
+    log = ReadingLog.query.filter_by(id=log_id, book_id=book_id).first_or_404()
+    db.session.delete(log)
+    db.session.commit()
+    return redirect(url_for("books.detail", book_id=book_id))
 
 
 @books_bp.route("/<int:book_id>/delete", methods=["POST"])
