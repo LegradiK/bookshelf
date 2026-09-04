@@ -68,7 +68,8 @@ function initBookSearch() {
           <p class="result-author">${escapeHtml(book.author)}</p>
           <div class="result-actions">
             ${addBookForm(book, "want_to_read", "Want to read")}
-            ${addBookForm(book, "reading", "Start reading", true)}
+            ${addBookForm(book, "reading", "Reading")}
+            ${addBookForm(book, "finished", "Finished", true)}
           </div>
         </div>
       </div>

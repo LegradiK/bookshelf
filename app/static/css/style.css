@@ -427,10 +427,34 @@ a { text-decoration: none; color: inherit; }
   border: 2px solid var(--tint-secondary);
 }
 
-.star-picker { display: flex; flex-direction: row; gap: 0.5rem; }
-.star-option { flex-direction: row !important; align-items: center; font-size: 22px; cursor: pointer; color: #ddd; gap: 0 !important;}
-.star-option input { display: none; }
-.star-option:has(input:checked) { color: var(--primary); }
+.star-picker {
+  display: flex;
+  flex-direction: row-reverse; /* visually reverses back to 1→5 order */
+  justify-content: flex-end;
+  font-size: 2rem;
+}
+
+.star-picker input[type="radio"] {
+  display: none; /* hide the actual radio buttons */
+}
+
+.star-option {
+  color: #ccc; /* default empty star color */
+  cursor: pointer;
+  transition: color 0.15s ease-in-out;
+}
+
+/* fill stars on hover, including all stars before it in DOM order */
+.star-picker input:hover ~ label,
+.star-picker label:hover ~ label,
+.star-picker label:hover {
+  color: gold;
+}
+
+/* keep selected stars filled after click */
+.star-picker input:checked ~ label {
+  color: gold;
+}
 
 .log-history { margin-top: 1.5rem; }
 .log-history h2 { font-family: var(--font-display); font-size: 18px; }

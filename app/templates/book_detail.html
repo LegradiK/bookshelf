@@ -3,92 +3,89 @@
 
 {% block content %}
 <div class="detail-layout">
-<div class="detail-cover">
+  <div class="detail-cover">
     {% if book.cover_url %}
-<img src="{{ book.cover_url }}" alt="Cover of {{ book.title }}">
+    <img src="{{ book.cover_url }}" alt="Cover of {{ book.title }}">
     {% else %}
-<div class="book-cover-placeholder large">{{ book.title[:1] }}</div>
+    <div class="book-cover-placeholder large">{{ book.title[:1] }}</div>
     {% endif %}
 
-<form method="post" action="{{ url_for('books.update_status', book_id=book.id) }}" class="status-form">
-<select name="status" onchange="this.form.submit()">
-<option value="want_to_read" {% if book.status == 'want_to_read' %}selected{% endif %}>Want to read</option>
-<option value="reading" {% if book.status == 'reading' %}selected{% endif %}>Reading now</option>
-<option value="finished" {% if book.status == 'finished' %}selected{% endif %}>Finished</option>
-</select>
-</form>
-</div>
+    <form method="post" action="{{ url_for('books.update_status', book_id=book.id) }}" class="status-form">
+      <select name="status" onchange="this.form.submit()">
+        <option value="want_to_read" {% if book.status == 'want_to_read' %}selected{% endif %}>Want to read</option>
+        <option value="reading" {% if book.status == 'reading' %}selected{% endif %}>Reading now</option>
+        <option value="finished" {% if book.status == 'finished' %}selected{% endif %}>Finished</option>
+      </select>
+    </form>
+  </div>
 
-<div class="detail-info">
-<h1 class="detail-title">{{ book.title }}</h1>
-<p class="detail-author">{{ book.author }}</p>
+  <div class="detail-info">
+    <h1 class="detail-title">{{ book.title }}</h1>
+    <p class="detail-author">{{ book.author }}</p>
 
     {% if book.times_read %}
-<p class="times-read">Read {{ book.times_read }} time{{ 's' if book.times_read != 1 }}</p>
+    <p class="times-read">Read {{ book.times_read }} time{{ 's' if book.times_read != 1 }}</p>
     {% endif %}
 
-<button type="button" class="btn-primary" onclick="document.getElementById('log-form').classList.toggle('open')">
+    <button type="button" class="btn-primary" onclick="document.getElementById('log-form').classList.toggle('open')">
       + Log a reading
-</button>
+    </button>
 
-<form id="log-form" class="log-form" method="post" action="{{ url_for('books.log_reading', book_id=book.id) }}">
-<label>Date read
-<input type="date" name="date_read" value="{{ today }}">
-</label>
+    <form id="log-form" class="log-form" method="post" action="{{ url_for('books.log_reading', book_id=book.id) }}">
+      <label>Date read
+        <input type="date" name="date_read" value="{{ today }}">
+      </label>
 
-<label>How many stars?
-<div class="star-picker">
-          {% for i in range(1, 6) %}
-<label class="star-option">
-<input type="radio" name="stars" value="{{ i }}">
-<span>&#9733;</span>
-</label>
-          {% endfor %}
-</div>
-</label>
+      <label>How many stars?</label>
+      <div class="star-picker">
+        {% for i in range(5, 0, -1) %}
+        <input type="radio" name="stars" value="{{ i }}" id="star{{ i }}">
+        <label for="star{{ i }}" class="star-option">&#9733;</label>
+        {% endfor %}
+      </div>
 
-<label>What did you think? (optional)
-<textarea name="review" rows="3" placeholder="I liked the part where..."></textarea>
-</label>
+      <label>What did you think? (optional)
+        <textarea name="review" rows="3" placeholder="I liked the part where..."></textarea>
+      </label>
 
-<button type="submit" class="btn-primary">Save reading</button>
-</form>
+      <button type="submit" class="btn-primary">Save reading</button>
+    </form>
 
     {% if book.logs %}
-<div class="log-history">
-<h2>Reading history</h2>
+    <div class="log-history">
+      <h2>Reading history</h2>
       {% for log in book.logs %}
-<div class="log-entry">
-<div class="log-entry-header">
-<span class="log-date">{{ log.date_read.strftime('%d %b %Y') }}</span>
+      <div class="log-entry">
+        <div class="log-entry-header">
+          <span class="log-date">{{ log.date_read.strftime('%d %b %Y') }}</span>
           {% if log.stars %}
-<span class="log-stars">{% for i in range(log.stars) %}&#9733;{% endfor %}</span>
+          <span class="log-stars">{% for i in range(log.stars) %}&#9733;{% endfor %}</span>
           {% endif %}
-<form method="post" action="{{ url_for('books.delete_log', book_id=book.id, log_id=log.id) }}"
-class="delete-log-form" onsubmit="return confirm('Delete this reading entry?');">
-<button type="submit" class="delete-log-btn" aria-label="Delete this entry">
-<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-<polyline points="3 6 5 6 21 6"></polyline>
-<path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
-<path d="M10 11v6"></path>
-<path d="M14 11v6"></path>
-<path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
-</svg>
-
-</form>
-</div>
+          <form method="post" action="{{ url_for('books.delete_log', book_id=book.id, log_id=log.id) }}"
+                class="delete-log-form" onsubmit="return confirm('Delete this reading entry?');">
+            <button type="submit" class="delete-log-btn" aria-label="Delete this entry">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                <path d="M10 11v6"></path>
+                <path d="M14 11v6"></path>
+                <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+              </svg>
+            </button>
+          </form>
+        </div>
         {% if log.review %}
-<p class="log-review">{{ log.review }}</p>
+        <p class="log-review">{{ log.review }}</p>
         {% endif %}
-</div>
+      </div>
       {% endfor %}
-</div>
+    </div>
     {% endif %}
 
-<form method="post" action="{{ url_for('books.delete_book', book_id=book.id) }}" class="delete-form"
-onsubmit="return confirm('Remove this book from your shelf?');">
-<button type="submit" class="btn-text-danger">Remove from shelf</button>
-</form>
-</div>
+    <form method="post" action="{{ url_for('books.delete_book', book_id=book.id) }}" class="delete-form"
+          onsubmit="return confirm('Remove this book from your shelf?');">
+      <button type="submit" class="btn-text-danger">Remove from shelf</button>
+    </form>
+  </div>
 </div>
 {% endblock %}

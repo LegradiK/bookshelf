@@ -27,10 +27,10 @@ def inject_palette():
 @library_bp.route("/")
 def bookshelf():
     """Main page: shows all logged books, optionally filtered by status."""
-    status_filter = request.args.get("status")
+    status_filter = request.args.get("status", "all")
 
     query = Book.query
-    if status_filter:
+    if status_filter != "all":
         query = query.filter_by(status=status_filter)
 
     books = query.order_by(Book.added_on.desc()).all()
