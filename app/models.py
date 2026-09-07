@@ -7,6 +7,7 @@ class Book(db.Model):
     title = db.Column(db.String(300), nullable=False)
     author = db.Column(db.String(300))
     cover_url = db.Column(db.String(500))
+    categories = db.Column(db.String(255))
     google_books_id = db.Column(db.String(100), unique=True)
     status = db.Column(db.String(20), default="want_to_read")
     # status: "want_to_read", "reading", "finished"

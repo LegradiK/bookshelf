@@ -43,6 +43,7 @@ def search_api():
             "author": ", ".join(info.get("authors", [])) or "Unknown author",
             "year": published_date[:4] if published_date else None,
             "cover_url": image_links.get("thumbnail"),
+            "categories": ", ".join(info.get("categories", [])),
         })
 
     return jsonify(results)
@@ -67,6 +68,7 @@ def add_book():
         author=request.form.get("author"),
         cover_url=request.form.get("cover_url"),
         status=status,
+        categories=request.form.get("categories", ""),
     )
     db.session.add(book)
     db.session.commit()

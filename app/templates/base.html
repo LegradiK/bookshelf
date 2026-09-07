@@ -14,6 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
 </head>
 
 <body>
@@ -26,7 +27,7 @@
         <a href="{{ url_for('library.bookshelf') }}" class="logo-text">My Bookshelf</a>
       </div>
       <nav class="site-nav">
-        <a href="{{ url_for('library.bookshelf') }}">Bookshelf</a>
+        <a href="{{ url_for('library.bookshelf') }}" class="btn-pill">Bookshelf</a>
         <a href="{{ url_for('library.search_page') }}" class="nav-cta">+ Add a book</a>
       </nav>
     </header>

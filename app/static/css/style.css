@@ -218,6 +218,11 @@ a { text-decoration: none; color: inherit; }
 
 .book-stars { color: var(--primary); margin: 0; font-size: 13px; }
 
+.no-review {
+  font-size: 11px;
+  margin: 2px;
+}
+
 .status-pill {
   align-self: flex-start;
   font-size: 11px;
@@ -283,6 +288,13 @@ a { text-decoration: none; color: inherit; }
   font-size: 15px;
 }
 
+.detail-cover .btn-primary {
+  margin-bottom: 1rem; /* or whatever value looks right, e.g. 16px, 1.5rem */
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem; /* nice small gap between arrow and text too */
+}
+
 .btn-text-danger {
   background: none;
   border: none;
@@ -290,6 +302,25 @@ a { text-decoration: none; color: inherit; }
   font-weight: 600;
   cursor: pointer;
   padding: 0.5rem 0;
+}
+
+.btn-pill {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 999px; /* fully rounded ends */
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 700;
+  background-color: var(--tint);
+  color: var(--primary-dark);
+  border: 2px solid var(--secondary);
+  transition: background-color 0.15s ease, border-color 0.30s ease;
+}
+
+.btn-pill:hover {
+  background-color: var(--secondary);
+  color: var(--surface);
+  border-color: var(--secondary-dark);
 }
 
 /* ---------- Search ---------- */
