@@ -41,7 +41,7 @@ onsubmit="return confirm('Remove this book from your shelf?');">
     {% if book.average_stars %}
 <p class="book-stars">{% for i in range(book.average_stars|round(0, 'floor')|int) %}&#9733;{% endfor %}</p>
     {% else %}
-<p class="no-review">No review yet</p>
+<p class="no-review">No reviews yet</p>
     {% endif %}
 <span class="status-pill status-{{ book.status }}">
       {% if book.status == 'reading' %}Reading now
