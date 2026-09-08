@@ -5,7 +5,15 @@
 <h1 class="page-title">Find a book</h1>
 <p class="page-subtitle">Type a title or author to search.</p>
 
-<input type="text" id="search-input" class="search-box" placeholder="Try 'The Gruffalo' or 'Julia Donaldson'" autocomplete="off">
+<div class="search-box">
+    <input
+        type="text"
+        id="book-search"
+        autofocus
+        autocomplete="off"
+    >
+    <div id="search-results"></div>
+</div>
 
 <div id="search-status" class="search-status"></div>
 <div id="search-results" class="search-results"></div>
