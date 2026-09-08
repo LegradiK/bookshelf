@@ -6,6 +6,7 @@ class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(300), nullable=False)
     author = db.Column(db.String(300))
+    isbn = db.Column(db.String(20), index=True)
     cover_url = db.Column(db.String(500))
     categories = db.Column(db.String(255))
     google_books_id = db.Column(db.String(100), unique=True)

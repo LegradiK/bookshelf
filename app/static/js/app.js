@@ -85,6 +85,7 @@ function initBookSearch() {
         <input type="hidden" name="cover_url" value="${escapeAttr(book.cover_url || "")}">
         <input type="hidden" name="categories" value="${escapeAttr(book.categories || "")}">
         <input type="hidden" name="status" value="${status}">
+        <input type="hidden" name="isbn" value="${escapeAttr(book.isbn)}">
         <button type="submit" class="btn-small${primary ? " primary" : ""}">${label}</button>
       </form>
     `;
