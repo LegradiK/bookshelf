@@ -263,6 +263,16 @@ a { text-decoration: none; color: inherit; }
   color: #c0392b;
 }
 
+/* ---------- Genre ---------- */
+
+.genre-title {font-weight: 800; }
+
+.genres-edit-form { display: none; margin-top: 8px; margin-bottom: 8px; }
+.genres-edit-form.open { display: flex; gap: 8px; align-items: center; }
+#genres-display.hidden { display: none; }
+.edit-icon-btn { background: none; border: none; cursor: pointer; opacity: 0.6; }
+.edit-icon-btn:hover { opacity: 1; }
+
 /* ---------- Empty state ---------- */
 .empty-state {
   text-align: center;
@@ -324,18 +334,18 @@ a { text-decoration: none; color: inherit; }
 }
 
 /* ---------- Search ---------- */
-.search-box {
+.search-input {
   width: 100%;
   font-size: 16px;
   font-family: var(--font-body);
-  padding: 0.9rem 1.1rem;
+  padding: 1.0rem 1.2rem;
   border-radius: 999px;
   border: 2px solid var(--tint-secondary);
   background: var(--surface);
   margin-bottom: 1rem;
 }
 
-.search-box:focus { outline: none; border-color: var(--secondary); }
+.search-input:focus { outline: none; border-color: var(--secondary); }
 
 .search-status { color: var(--text-secondary); font-size: 14px; min-height: 1.2em; margin-bottom: 0.5rem; }
 

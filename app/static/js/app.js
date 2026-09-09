@@ -67,9 +67,9 @@ function initBookSearch() {
           <p class="result-title">${escapeHtml(book.title)}${yearText}</p>
           <p class="result-author">${escapeHtml(book.author)}</p>
           <div class="result-actions">
-            ${addBookForm(book, "want_to_read", "Want to read")}
-            ${addBookForm(book, "reading", "Reading")}
-            ${addBookForm(book, "finished", "Finished", true)}
+${addBookForm(book, "want_to_read", "Want to read")}
+${addBookForm(book, "reading", "Reading")}
+${addBookForm(book, "finished", "Finished", true)}
           </div>
         </div>
       </div>
@@ -101,3 +101,5 @@ function initBookSearch() {
     return escapeHtml(str);
   }
 }
+
+document.addEventListener("DOMContentLoaded", initBookSearch);

@@ -3,16 +3,17 @@
 
 {% block content %}
 <h1 class="page-title">Find a book</h1>
-<p class="page-subtitle">Type a title or author to search.</p>
+<p class="page-subtitle">Type a title and/or author to search.</p>
 
 <div class="search-box">
-    <input
-        type="text"
-        id="book-search"
-        autofocus
-        autocomplete="off"
+<input
+type="text"
+id="search-input"
+class="search-input"
+placeholder="e.g. Hamlet William Shakespeare"
+autofocus
+autocomplete="off"
     >
-    <div id="search-results"></div>
 </div>
 
 <div id="search-status" class="search-status"></div>
@@ -21,6 +22,6 @@
 
 {% block scripts %}
 <script>
-  initBookSearch();
+initBookSearch();
 </script>
 {% endblock %}

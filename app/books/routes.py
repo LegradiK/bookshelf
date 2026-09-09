@@ -163,6 +163,13 @@ def get_genres_from_open_library(isbn, google_categories=None, limit=5):
 
     return genres
 
+@books_bp.route("/book/<int:book_id>/genres", methods=["POST"])
+def update_genres(book_id):
+    book = Book.query.get_or_404(book_id)
+    book.categories = request.form.get("categories", "").strip()
+    db.session.commit()
+    return redirect(url_for("books.detail", book_id=book_id))
+
 @books_bp.route("/add-book", methods=["POST"])
 def add_book():
     """Add a book found via search onto the child's shelf."""
