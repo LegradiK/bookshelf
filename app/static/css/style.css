@@ -140,6 +140,21 @@ a { text-decoration: none; color: inherit; }
   color: var(--primary-dark);
 }
 
+/* ---------- Login page ---------- */
+#username, #password {
+  font-family: var(--font-body);
+  font-size: 15px;
+  margin-bottom: 13px;
+  border: none;
+  border-radius: 999px;
+  padding: 5px;
+  padding-left: 10px;
+  margin: 8px;
+  background-color: var(--surface);
+  color: var(--text-secondary);
+  font-weight: 700;
+}
+
 /* ---------- Book grid ---------- */
 .book-grid {
   display: grid;
@@ -272,6 +287,33 @@ a { text-decoration: none; color: inherit; }
 #genres-display.hidden { display: none; }
 .edit-icon-btn { background: none; border: none; cursor: pointer; opacity: 0.6; }
 .edit-icon-btn:hover { opacity: 1; }
+
+/* ---------- Select ---------- */
+.filter-tabs,
+.sort-bar {
+  font-family: var(--font-body);
+}
+
+.tab {
+  font-family: var(--font-body);
+  font-size: 15px;
+}
+
+#sort-select,
+#genre-select,
+#author-select {
+  font-family: var(--font-body);
+  font-size: 15px;
+  margin-bottom: 13px;
+  border: none;
+  border-radius: 999px;
+  padding: 5px;
+  padding-left: 10px;
+  margin-right: 5px;
+  background-color: var(--surface);
+  color: var(--text-secondary);
+  font-weight: 700;
+}
 
 /* ---------- Empty state ---------- */
 .empty-state {

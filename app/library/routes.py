@@ -12,6 +12,9 @@ def _current_colour_hex() -> str:
         return setting.colour_hex
     return DEFAULT_HEX
 
+@library_bp.route("/")
+def index():
+    return redirect(url_for("library.bookshelf"))
 
 @library_bp.app_context_processor
 def inject_palette():
@@ -24,23 +27,61 @@ def inject_palette():
     }
 
 
-@library_bp.route("/")
+@library_bp.route("/bookshelf")
 def bookshelf():
-    """Main page: shows all logged books, optionally filtered by status."""
-    status_filter = request.args.get("status", "all")
+    sort = request.args.get("sort", "recent")
+    selected_genre = request.args.get("genre", "")
+    selected_author = request.args.get("author", "")
+    active_status = request.args.get("status", "all")
+
+    all_genres = set()
+    for (categories,) in db.session.query(Book.categories).filter(Book.categories.isnot(None)):
+        for g in categories.split(","):
+            g = g.strip()
+            if g:
+                all_genres.add(g)
+    all_genres = sorted(all_genres)
+
+    all_authors = sorted({
+        a for (a,) in db.session.query(Book.author).filter(Book.author.isnot(None))
+    })
 
     query = Book.query
-    if status_filter != "all":
-        query = query.filter_by(status=status_filter)
 
-    books = query.order_by(Book.added_on.desc()).all()
+    if active_status != "all":
+        query = query.filter(Book.status == active_status)
+    if selected_genre:
+        query = query.filter(Book.categories.ilike(f"%{selected_genre}%"))
+    if selected_author:
+        query = query.filter(Book.author == selected_author)
+
+    if sort == "title":
+        query = query.order_by(Book.title.asc())
+    elif sort == "author":
+        query = query.order_by(Book.author.asc())
+    elif sort == "genre":
+        query = query.order_by(Book.categories.asc())
+    elif sort == "stars":
+        query = query.order_by(Book.id.desc())
+    else:  # "recent" fallback
+        query = query.order_by(Book.id.desc())
+
+    books = query.all()
+
+    if sort == "stars":
+        books.sort(key=lambda b: b.average_stars or 0, reverse=True)
+
 
     return render_template(
         "bookshelf.html",
         books=books,
-        active_status=status_filter,
+        genres=all_genres,
+        authors=all_authors,
+        sort=sort,
+        selected_genre=selected_genre,
+        selected_author=selected_author,
+        active_status=active_status,
     )
-
 
 @library_bp.route("/search")
 def search_page():

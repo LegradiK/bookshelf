@@ -3,11 +3,41 @@
 
 {% block content %}
 <div class="filter-tabs">
-<a href="{{ url_for('library.bookshelf', status='all') }}" class="tab {% if active_status == 'all' %}active{% endif %}">All books</a>
-<a href="{{ url_for('library.bookshelf', status='reading') }}" class="tab {% if active_status == 'reading' %}active{% endif %}">Reading now</a>
-<a href="{{ url_for('library.bookshelf', status='finished') }}" class="tab {% if active_status == 'finished' %}active{% endif %}">Finished</a>
-<a href="{{ url_for('library.bookshelf', status='want_to_read') }}" class="tab {% if active_status == 'want_to_read' %}active{% endif %}">Want to read</a>
+<a href="{{ url_for('library.bookshelf', status='all', sort=sort, genre=selected_genre, author=selected_author) }}" class="tab {% if active_status == 'all' %}active{% endif %}">All books</a>
+<a href="{{ url_for('library.bookshelf', status='reading', sort=sort, genre=selected_genre, author=selected_author) }}" class="tab {% if active_status == 'reading' %}active{% endif %}">Reading now</a>
+<a href="{{ url_for('library.bookshelf', status='finished', sort=sort, genre=selected_genre, author=selected_author) }}" class="tab {% if active_status == 'finished' %}active{% endif %}">Finished</a>
+<a href="{{ url_for('library.bookshelf', status='want_to_read', sort=sort, genre=selected_genre, author=selected_author) }}" class="tab {% if active_status == 'want_to_read' %}active{% endif %}">Want to read</a>
 </div>
+
+<form method="get" class="sort-bar" id="filter-form">
+<input type="hidden" name="status" value="{{ active_status }}">
+
+<form method="get" class="sort-bar" id="filter-form">
+  <label for="sort-select">Sort by</label>
+  <select id="sort-select" name="sort" onchange="this.form.submit()">
+    <option value="recent" {% if sort == 'recent' %}selected{% endif %}>Most recent</option>
+    <option value="title" {% if sort == 'title' %}selected{% endif %}>Title</option>
+    <option value="author" {% if sort == 'author' %}selected{% endif %}>Author</option>
+    <option value="genre" {% if sort == 'genre' %}selected{% endif %}>Genre</option>
+    <option value="stars" {% if sort == 'stars' %}selected{% endif %}>Highest rated</option>
+  </select>
+
+  <label for="genre-select">Genre</label>
+  <select id="genre-select" name="genre" onchange="this.form.submit()">
+    <option value="">All genres</option>
+    {% for g in genres %}
+      <option value="{{ g }}" {% if g == selected_genre %}selected{% endif %}>{{ g }}</option>
+    {% endfor %}
+  </select>
+
+  <label for="author-select">Author</label>
+  <select id="author-select" name="author" onchange="this.form.submit()">
+    <option value="">All authors</option>
+    {% for a in authors %}
+      <option value="{{ a }}" {% if a == selected_author %}selected{% endif %}>{{ a }}</option>
+    {% endfor %}
+  </select>
+</form>
 
 {% if books %}
 <div class="book-grid">
