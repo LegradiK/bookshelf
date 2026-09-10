@@ -25,7 +25,7 @@ def register():
         session["user_id"] = user.id
         return redirect(url_for("library.bookshelf"))
 
-    return render_template("register.html")
+    return render_template("signup.html")
 
 
 @auth_bp.route("/login", methods=["GET", "POST"])

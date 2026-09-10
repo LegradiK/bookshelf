@@ -1,7 +1,8 @@
 import os
-from flask import Flask
 from config import Config
 from app.extensions import db
+from flask import Flask, session
+from app.models import db, User
 
 
 def create_app(config_class=Config):
@@ -21,5 +22,12 @@ def create_app(config_class=Config):
 
     with app.app_context():
         db.create_all()
+
+    @app.context_processor
+    def inject_user():
+        user = None
+        if "user_id" in session:
+            user = User.query.get(session["user_id"])
+        return dict(current_user=user)
 
     return app

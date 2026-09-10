@@ -3,39 +3,29 @@
 
 {% block content %}
 <div class="login-layout">
-<h1 class="page-title">Log in</h1>
-<p class="page-subtitle">Enter your details to continue.</p>
+    <h1 class="page-title">Welcome back!</h1>
+    <p class="page-subtitle">Log in to see your bookshelf.</p>
 
     {% if error %}
-<p class="login-error">{{ error }}</p>
+    <p class="login-error">{{ error }}</p>
     {% endif %}
 
-<form method="post" action="{{ url_for('auth.login') }}" class="login-form">
+    <form method="post" action="{{ url_for('auth.login') }}" class="login-form">
+        <label for="username">Username
+            <input type="text" id="username" class="username" name="username"
+                   autocomplete="username" autofocus required>
+        </label>
 
-<label for="username">Username
-<input
-type="text"
-id="username"
-class="username"
-name="username"
-autocomplete="username"
-autofocus
-required
->
-</label>
+        <label for="password">Password
+            <input type="password" id="password" class="password" name="password"
+                   autocomplete="current-password" required>
+        </label>
 
-<label for="password">Password
-<input
-type="password"
-id="password"
-class="password"
-name="password"
-autocomplete="current-password"
-required
->
-</label>
+        <button type="submit" class="btn-primary">Log in</button>
+    </form>
 
-<button type="submit" class="btn-primary">Log in</button>
-</form>
+    <p class="sign-up-page-navigate">
+        No account yet? <a href="{{ url_for('auth.register') }}">Sign up</a>
+    </p>
 </div>
 {% endblock %}

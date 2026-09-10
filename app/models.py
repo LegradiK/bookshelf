@@ -5,12 +5,13 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)  # NEW
     title = db.Column(db.String(300), nullable=False)
     author = db.Column(db.String(300))
     isbn = db.Column(db.String(20), index=True)
     cover_url = db.Column(db.String(500))
     categories = db.Column(db.String(255))
-    google_books_id = db.Column(db.String(100), unique=True)
+    google_books_id = db.Column(db.String(100))  # unique=True REMOVED — see note below
     status = db.Column(db.String(20), default="want_to_read")
     # status: "want_to_read", "reading", "finished"
     added_on = db.Column(db.Date, default=date.today)
@@ -18,6 +19,10 @@ class Book(db.Model):
     logs = db.relationship(
         "ReadingLog", backref="book", lazy=True, cascade="all, delete-orphan",
         order_by="ReadingLog.date_read.desc()"
+    )
+
+    __table_args__ = (
+        db.UniqueConstraint("user_id", "google_books_id", name="uq_user_google_book"),
     )
 
     @property
@@ -47,7 +52,7 @@ class ReadingLog(db.Model):
 class Setting(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     colour_hex = db.Column(db.String(7), nullable=True)  # e.g. "#C4B2A2"
- 
+
     @classmethod
     def get(cls):
         setting = cls.query.first()
@@ -57,10 +62,13 @@ class Setting(db.Model):
             db.session.commit()
         return setting
 
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
+
+    books = db.relationship("Book", backref="owner", lazy=True, cascade="all, delete-orphan")  # NEW
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

@@ -141,7 +141,14 @@ a { text-decoration: none; color: inherit; }
 }
 
 /* ---------- Login page ---------- */
-#username, #password {
+.welcome-message {
+  margin-bottom: 3rem;
+  font-size: 18px;
+  color: var(--secondary-dark);
+  font-weight: 700;
+}
+
+#username, #password, #confirm_password {
   font-family: var(--font-body);
   font-size: 15px;
   margin-bottom: 13px;
@@ -153,6 +160,25 @@ a { text-decoration: none; color: inherit; }
   background-color: var(--surface);
   color: var(--text-secondary);
   font-weight: 700;
+}
+
+.user-name {
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.sign-up-page-navigate {
+  margin-top: 1rem;
+  font-size: 12px;
+}
+
+.sign-up-page-navigate a {
+  font-weight: 800;
+}
+
+.signup-button {
+  margin-top: 1rem;
 }
 
 /* ---------- Book grid ---------- */
