@@ -1,9 +1,10 @@
 from flask import render_template, request, redirect, url_for, abort, session
 
 from . import library_bp
-from app.models import db, Book, Setting, User, ReadingLog
+from app.models import db, Book, Setting, User
 from app.colours import COLOUR_GROUPS, COLOURS_BY_ID, VALID_HEXES, DEFAULT_HEX
 from app.colour_shades import site_palette
+from app.auth.routes import login_required
 
 from functools import wraps
 
@@ -13,14 +14,6 @@ def _current_colour_hex() -> str:
     if setting.colour_hex and setting.colour_hex in VALID_HEXES:
         return setting.colour_hex
     return DEFAULT_HEX
-
-def login_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if "user_id" not in session:
-            return redirect(url_for("auth.login"))
-        return f(*args, **kwargs)
-    return decorated
 
 
 @library_bp.route("/")
@@ -38,37 +31,6 @@ def inject_palette():
         "palette": site_palette(_current_colour_hex()),
         "colour_groups": COLOUR_GROUPS,
     }
-
-
-@library_bp.route("/add-book", methods=["POST"])
-def add_book():
-    user_id = session["user_id"]
-    google_id = request.form["google_books_id"]
-
-    book = Book.query.filter_by(google_books_id=google_id, user_id=user_id).first()
-    if not book:
-        # fetch from Google Books API and create it
-        book = Book(
-            user_id=user_id,
-            google_books_id=google_id, 
-            title=..., 
-            author=..., 
-            cover_url=...
-            )
-        db.session.add(book)
-        db.session.flush()  # get book.id before commit
-
-    log = ReadingLog(
-        book=book, 
-        stars=request.form.get("stars", type=int), 
-        review=request.form.get("review")
-        )
-    db.session.add(log)
-
-    book.status = "finished"
-    db.session.commit()
-
-    return redirect(url_for("library.bookshelf"))
 
 @library_bp.route("/bookshelf")
 @login_required

@@ -1,15 +1,18 @@
 import requests
+from dotenv import load_dotenv
 from datetime import date, datetime
-from flask import render_template, request, redirect, url_for, jsonify, current_app
+from flask import render_template, request, redirect, url_for, jsonify, current_app, session, abort
 
 from . import books_bp
 from app.models import db, Book, ReadingLog
+from app.auth.routes import login_required
 
 GOOGLE_BOOKS_API = "https://www.googleapis.com/books/v1/volumes"
 
+load_dotenv('data.env')
 
 @books_bp.route("/search-books")
-def search_api():
+def search_books():
     """AJAX endpoint: search Google Books and return simplified results for the search page."""
     q = request.args.get("q", "").strip()
     if not q:
@@ -164,18 +167,22 @@ def get_genres_from_open_library(isbn, google_categories=None, limit=5):
     return genres
 
 @books_bp.route("/book/<int:book_id>/genres", methods=["POST"])
+@login_required
 def update_genres(book_id):
-    book = Book.query.get_or_404(book_id)
+    book = Book.query.filter_by(id=book_id, user_id=session["user_id"]).first_or_404()
     book.categories = request.form.get("categories", "").strip()
     db.session.commit()
     return redirect(url_for("books.detail", book_id=book_id))
 
+
 @books_bp.route("/add-book", methods=["POST"])
+@login_required
 def add_book():
     """Add a book found via search onto the child's shelf."""
+    user_id = session["user_id"]
     google_books_id = request.form.get("google_books_id")
 
-    existing = Book.query.filter_by(google_books_id=google_books_id).first()
+    existing = Book.query.filter_by(google_books_id=google_books_id, user_id=user_id).first()
     if existing:
         return redirect(url_for("books.detail", book_id=existing.id))
 
@@ -189,6 +196,7 @@ def add_book():
     categories = ", ".join(genres) if genres else google_categories
 
     book = Book(
+        user_id=user_id,
         google_books_id=google_books_id,
         isbn=isbn,
         title=request.form.get("title"),
@@ -204,9 +212,10 @@ def add_book():
 
 
 @books_bp.route("/<int:book_id>")
+@login_required
 def detail(book_id):
     """Book detail page: status, times read, and the reading log history."""
-    book = Book.query.get_or_404(book_id)
+    book = Book.query.filter_by(id=book_id, user_id=session["user_id"]).first_or_404()
 
     return render_template(
         "book_detail.html",
@@ -218,9 +227,10 @@ def detail(book_id):
 
 
 @books_bp.route("/<int:book_id>/status", methods=["POST"])
+@login_required
 def update_status(book_id):
     """Update a book's shelf status (want_to_read / reading / finished)."""
-    book = Book.query.get_or_404(book_id)
+    book = Book.query.filter_by(id=book_id, user_id=session["user_id"]).first_or_404()
     new_status = request.form.get("status")
 
     if new_status in {"want_to_read", "reading", "finished"}:
@@ -231,15 +241,13 @@ def update_status(book_id):
 
 
 @books_bp.route("/<int:book_id>/log", methods=["POST"])
+@login_required
 def log_reading(book_id):
     """Add a reading log entry: date read, star rating, optional review."""
-    book = Book.query.get_or_404(book_id)
+    book = Book.query.filter_by(id=book_id, user_id=session["user_id"]).first_or_404()
 
     date_read_str = request.form.get("date_read")
-    if date_read_str:
-        date_read = datetime.strptime(date_read_str, "%Y-%m-%d").date()
-    else:
-        date_read = date.today()
+    date_read = datetime.strptime(date_read_str, "%Y-%m-%d").date() if date_read_str else date.today()
 
     log = ReadingLog(
         book_id=book.id,
@@ -257,18 +265,21 @@ def log_reading(book_id):
 
 
 @books_bp.route("/<int:book_id>/log/<int:log_id>/delete", methods=["POST"])
+@login_required
 def delete_log(book_id, log_id):
     """Remove a single reading log entry from a book's history."""
-    log = ReadingLog.query.filter_by(id=log_id, book_id=book_id).first_or_404()
+    book = Book.query.filter_by(id=book_id, user_id=session["user_id"]).first_or_404()
+    log = ReadingLog.query.filter_by(id=log_id, book_id=book.id).first_or_404()
     db.session.delete(log)
     db.session.commit()
     return redirect(url_for("books.detail", book_id=book_id))
 
 
 @books_bp.route("/<int:book_id>/delete", methods=["POST"])
+@login_required
 def delete_book(book_id):
     """Remove a book (and its reading logs) from the shelf entirely."""
-    book = Book.query.get_or_404(book_id)
+    book = Book.query.filter_by(id=book_id, user_id=session["user_id"]).first_or_404()
 
     ReadingLog.query.filter_by(book_id=book.id).delete()
     db.session.delete(book)
