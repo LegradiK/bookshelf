@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Achievements{% endblock %}
+
+{% block content %}
+<div class="achievements-header">
+  <h1>Achievements</h1>
+  <p class="achievements-subtitle">{{ finished_count }} book{{ 's' if finished_count != 1 else '' }} finished</p>
+</div>
+
+{% if next_milestone %}
+<div class="progress-wrap">
+  <div class="progress-top">
+    <p class="progress-label">{{ books_to_next }} book{{ 's' if books_to_next != 1 else '' }} to reach next milestone</p>
+    <p class="progress-fraction">{{ finished_count }} / {{ next_milestone }}</p>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-bar-fill" style="width: {{ progress_pct }}%;"></div>
+  </div>
+</div>
+{% else %}
+<div class="progress-complete">
+  <span class="progress-complete-icon">🎉</span>
+  <p>All milestones unlocked!</p>
+</div>
+{% endif %}
+
+<div class="badge-grid">
+  {% for m in milestones %}
+  <div class="badge {% if m in achieved %}badge-unlocked{% else %}badge-locked{% endif %}">
+    <div class="badge-icon">
+      {% if m in achieved %}🏆{% else %}🔒{% endif %}
+    </div>
+    <p class="badge-count">{{ m }}</p>
+    <p class="badge-label">book{{ 's' if m != 1 else '' }}</p>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -32,13 +32,14 @@
         {% endif %}
       </div>
       <nav class="site-nav">
+        <a href="{{ url_for('library.achievements') }}" class="btn-pill">Achievements</a> 
+        <a href="{{ url_for('library.search_page') }}" class="nav-cta">+ Add a book</a>
+        <a href="{{ url_for('library.bookshelf') }}" class="btn-pill">Bookshelf</a> 
         {% if session.get('user_id') %}
             <a href="{{ url_for('auth.logout') }}" class="nav-cta">Sign out</a>
         {% else %}
             <a href="{{ url_for('auth.login') }}" class="nav-cta">Login</a>
         {% endif %}
-        <a href="{{ url_for('library.bookshelf') }}" class="btn-pill">Bookshelf</a>
-        <a href="{{ url_for('library.search_page') }}" class="nav-cta">+ Add a book</a>
       </nav>
     </header>
 
