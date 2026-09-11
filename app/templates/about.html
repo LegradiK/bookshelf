@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}About{% endblock %}
+
+{% block content %}
+<div class="page">
+  <h1 class="page-title">About</h1>
+  <p class="page-subtitle">A little bit about this bookshelf.</p>
+
+  <div class="empty-state" style="text-align: left; padding: 1.5rem 1.75rem;">
+    <p>
+      This is a place to track the books you're reading, finished, or want to read next —
+      log your star ratings, jot a quick review, and watch your reading milestones add up
+      over time.
+    </p>
+    <p>
+      Search for a book, add it to your shelf, and update its status as you go. Every book
+      you finish counts toward your next achievement badge.
+    </p>
+  </div>
+
+  <div style="margin-top: 2rem; text-align: center;">
+    <a href="{{ url_for('auth.login') }}" class="btn-primary">Login</a>
+    <p class="sign-up-page-navigate">
+        No account yet? <a href="{{ url_for('auth.register') }}">Sign up</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

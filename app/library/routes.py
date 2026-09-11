@@ -30,6 +30,11 @@ def inject_palette():
 
 PER_PAGE = 20
 
+@library_bp.route("/about")
+def about():
+    "this page explains what this web app is for"
+    return render_template("about.html")
+
 @library_bp.route("/bookshelf")
 @login_required
 def bookshelf():
