@@ -121,7 +121,9 @@ a { text-decoration: none; color: inherit; }
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
-  flex-wrap: wrap;
+  flex-shrink: 0;     
+  flex-wrap: nowrap;  
+  overflow-x: auto;
 }
 
 .tab {
@@ -144,16 +146,15 @@ a { text-decoration: none; color: inherit; }
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 0.75rem;
 }
 
 .book-count {
-  margin: 0;
-  white-space: nowrap;
-  font-size: 1rem;
-  color: #666;
-  font-weight: 700;;
+  flex-shrink: 1;
+  min-width: 0;        
+  white-space: normal; 
+  text-align: right;
 }
 
 /* ---------- Login page ---------- */
@@ -331,7 +332,55 @@ a { text-decoration: none; color: inherit; }
 .edit-icon-btn { background: none; border: none; cursor: pointer; opacity: 0.6; }
 .edit-icon-btn:hover { opacity: 1; }
 
+/* ---------- Search box ---------- */
+.search-field {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 1;
+}
+
+.search-field input[type="text"] {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  max-width: 140px;
+}
+
+.search-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  padding: 0.3rem;
+  display: flex;
+}
+
+.search-btn:hover {
+  color: var(--primary);
+}
+
 /* ---------- Select ---------- */
+
+.sort-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.sort-bar label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
 .filter-tabs,
 .sort-bar {
   font-family: var(--font-body);
@@ -347,16 +396,20 @@ a { text-decoration: none; color: inherit; }
 #author-select {
   font-family: var(--font-body);
   font-size: 15px;
-  margin-bottom: 13px;
   border: none;
   border-radius: 999px;
   padding: 5px;
   padding-left: 10px;
-  margin-right: 5px;
+  margin-right: 3px;
   background-color: var(--surface);
   color: var(--text-secondary);
   font-weight: 700;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
+
 
 /* ---------- Empty state ---------- */
 .empty-state {
@@ -438,7 +491,7 @@ a { text-decoration: none; color: inherit; }
   width: 100%;
   font-size: 16px;
   font-family: var(--font-body);
-  padding: 1.0rem 1.2rem;
+  padding: 1.0rem 1.0rem;
   border-radius: 999px;
   border: 2px solid var(--tint-secondary);
   background: var(--surface);

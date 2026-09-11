@@ -19,8 +19,6 @@
       {%- else %} Want to read
       {%- endif %}
     {% endif %}
-    {% if selected_genre %} &middot; {{ selected_genre }}{% endif %}
-    {% if selected_author %} &middot; {{ selected_author }}{% endif %}
   </p>
 </div>
 
@@ -51,6 +49,18 @@
       <option value="{{ a }}" {% if a == selected_author %}selected{% endif %}>{{ a }}</option>
     {% endfor %}
   </select>
+
+  <div class="search-field">
+    <label for="q-input">Search</label>
+    <input type="text" id="q-input" name="q" value="{{ query }}" placeholder="Title or author...">
+    <button type="submit" class="search-btn" aria-label="Search">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+    </button>
+  </div>
+
 </form>
 
 {% if books %}
@@ -95,7 +105,6 @@
     </a>
   </div>
   {% endfor %}
-</div>
 </div>
 {% if has_more %}
 <div class="show-more-wrap">

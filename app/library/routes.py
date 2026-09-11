@@ -40,6 +40,7 @@ def bookshelf():
     selected_author = request.args.get("author", "")
     active_status = request.args.get("status", "all")
     page = request.args.get('page', 1, type=int)
+    query_text = request.args.get("q", "").strip()
 
     all_genres = set()
     for (categories,) in db.session.query(Book.categories).filter(Book.categories.isnot(None)):
@@ -61,6 +62,13 @@ def bookshelf():
         query = query.filter(Book.categories.ilike(f"%{selected_genre}%"))
     if selected_author:
         query = query.filter(Book.author == selected_author)
+        if query_text:
+            query = query.filter(
+                db.or_(
+                    Book.title.ilike(f"%{query_text}%"),
+                    Book.author.ilike(f"%{query_text}%"),
+                )
+        )
 
     if sort == "title":
         query = query.order_by(Book.title.asc())
@@ -90,6 +98,7 @@ def bookshelf():
         selected_genre=selected_genre,
         selected_author=selected_author,
         active_status=active_status,
+        query=query_text,
         page=page,
         has_more=has_more,
         user_name=user.username if user else None
