@@ -2,6 +2,7 @@ function initBookSearch() {
   const input = document.getElementById("search-input");
   const statusEl = document.getElementById("search-status");
   const resultsEl = document.getElementById("search-results");
+  const globalStatusSelect = document.getElementById("reading-status-select");
   if (!input) return;
 
   let debounceTimer = null;
@@ -55,46 +56,55 @@ function initBookSearch() {
   }
 
   function renderResultCard(book) {
-    const cover = book.cover_url
+    const coverInner = book.cover_url
       ? `<img src="${escapeAttr(book.cover_url)}" alt="Cover of ${escapeAttr(book.title)}">`
-      : "";
+      : `<div class="book-cover-placeholder">${escapeHtml((book.title || "?").charAt(0))}</div>`;
     const yearText = book.year ? ` (${book.year})` : "";
     const id = escapeAttr(book.google_books_id || "");
     const checked = selected.has(book.google_books_id) ? "checked" : "";
 
     return `
-      <div class="result-card">
-        <label class="result-checkbox-label">
+      <div class="book-card">
+        <label class="book-select-label">
           <input type="checkbox" class="result-select" data-id="${id}" ${checked}>
         </label>
-        <div class="result-cover">${cover}</div>
-        <div class="result-info">
-          <p class="result-title">${escapeHtml(book.title)}${yearText}</p>
-          <p class="result-author">${escapeHtml(book.author)}</p>
-          <div class="result-actions">
-            ${addBookForm(book, "want_to_read", "Want to read")}
-            ${addBookForm(book, "reading", "Reading")}
-            ${addBookForm(book, "finished", "Finished", true)}
-          </div>
-        </div>
+        <div class="book-cover">${coverInner}</div>
+        <p class="book-title">${escapeHtml(book.title)}${yearText}</p>
+        <p class="book-author">${escapeHtml(book.author)}</p>
+        ${addBookForm(book)}
       </div>
     `;
   }
 
-  function addBookForm(book, status, label, primary) {
+  function addBookForm(book) {
     return `
-      <form method="post" action="/add-book" style="display:inline;">
+      <form method="post" action="/add-book" class="result-add-form">
         <input type="hidden" name="google_books_id" value="${escapeAttr(book.google_books_id || "")}">
         <input type="hidden" name="title" value="${escapeAttr(book.title)}">
         <input type="hidden" name="author" value="${escapeAttr(book.author)}">
         <input type="hidden" name="cover_url" value="${escapeAttr(book.cover_url || "")}">
         <input type="hidden" name="categories" value="${escapeAttr(book.categories || "")}">
-        <input type="hidden" name="status" value="${status}">
         <input type="hidden" name="isbn" value="${escapeAttr(book.isbn)}">
-        <button type="submit" class="btn-small${primary ? " primary" : ""}">${label}</button>
+        <input type="hidden" name="status" class="status-carrier">
+        <button type="submit" class="btn-small primary">Add</button>
       </form>
     `;
   }
+
+  // Fill each form's hidden status field from the global select right before it submits,
+  // and block submission if no status has been chosen yet.
+  resultsEl.addEventListener("submit", (e) => {
+    const form = e.target;
+    if (!form.classList.contains("result-add-form")) return;
+
+    if (!globalStatusSelect.value) {
+      e.preventDefault();
+      globalStatusSelect.focus();
+      statusEl.textContent = "Pick a reading status first.";
+      return;
+    }
+    form.querySelector(".status-carrier").value = globalStatusSelect.value;
+  });
 
   // Track checkbox changes via event delegation, since cards are re-rendered on every search
   resultsEl.addEventListener("change", (e) => {
@@ -116,11 +126,6 @@ function initBookSearch() {
       bar.className = "bulk-add-bar";
       bar.innerHTML = `
         <span id="bulk-count"></span>
-        <select id="bulk-status">
-          <option value="want_to_read">Want to read</option>
-          <option value="reading">Reading</option>
-          <option value="finished">Finished</option>
-        </select>
         <button type="button" id="bulk-add-btn" class="btn-primary">Add selected books</button>
       `;
       document.body.appendChild(bar);
@@ -133,7 +138,12 @@ function initBookSearch() {
   }
 
   function submitBulkAdd() {
-    const status = document.getElementById("bulk-status").value;
+    if (!globalStatusSelect.value) {
+      globalStatusSelect.focus();
+      statusEl.textContent = "Pick a reading status first.";
+      return;
+    }
+    const status = globalStatusSelect.value;
 
     const form = document.createElement("form");
     form.method = "post";

@@ -40,7 +40,7 @@
     </button>
     </p>
     <form id="genres-edit-form" class="genres-edit-form" method="post" action="{{ url_for('books.update_genres', book_id=book.id) }}">
-    <input type="text" name="categories" value="{{ book.categories or '' }}" placeholder="e.g. Fantasy, Adventure" autocomplete="off">
+    <input type="text" class="genre-update-input" name="categories" value="{{ book.categories or '' }}" placeholder="e.g. Fantasy, Adventure" autocomplete="off">
     <button type="submit" class="btn-small primary">Save</button>
     <button type="button" class="btn-small" onclick="toggleGenreEdit()">Cancel</button>
     </form>
@@ -50,14 +50,8 @@
     <label for="times_read" class="times_read">Times read
         <input type="number" id="times_read" name="times_read" min="0" value="{{ book.times_read }}" class="times-read-box">
     </label>
-    <button type="button" class="edit-icon-btn" aria-label="Edit genres" onclick="toggleGenreEdit()">
-        <i class="ti ti-pencil"></i>
-    </button>
+    <button type="submit" class="btn-small save-btn">Save</button>
 </form>
-
-    {% if book.times_read %}
-<p class="times-read">Read {{ book.times_read }} time{{ 's' if book.times_read != 1 }}</p>
-    {% endif %}
 
 <button type="button" class="btn-primary" onclick="document.getElementById('log-form').classList.toggle('open')">
       + Log a reading

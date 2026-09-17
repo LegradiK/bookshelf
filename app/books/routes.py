@@ -60,7 +60,12 @@ def _extract_isbn(volume_info):
 
 def _fetch_volume_details(google_books_id):
     """Fetch a single volume by ID — used when bulk-adding from search results."""
-    resp = requests.get(f"{GOOGLE_BOOKS_API}/{google_books_id}", timeout=5)
+    params = {}
+    api_key = current_app.config.get("GOOGLE_BOOKS_API_KEY")
+    if api_key:
+        params["key"] = api_key
+
+    resp = requests.get(f"{GOOGLE_BOOKS_API}/{google_books_id}", params=params, timeout=5)
     resp.raise_for_status()
     info = resp.json().get("volumeInfo", {})
     image_links = info.get("imageLinks", {})
@@ -246,6 +251,7 @@ def add_books():
     if status not in {"want_to_read", "reading", "finished"}:
         status = "want_to_read"
 
+    skipped = 0
     for google_books_id in google_books_ids:
         existing = Book.query.filter_by(google_books_id=google_books_id, user_id=user_id).first()
         if existing:
@@ -254,6 +260,7 @@ def add_books():
         try:
             details = _fetch_volume_details(google_books_id)
         except requests.RequestException:
+            skipped += 1
             continue  # skip any book whose lookup fails, rather than failing the whole batch
 
         genres = get_genres_from_open_library(details["isbn"], google_categories=details["categories"])
@@ -272,6 +279,8 @@ def add_books():
         db.session.add(book)
 
     db.session.commit()
+    if skipped:
+        print(f"{skipped} book(s) couldn't be added — try again in a moment.")
     return redirect(url_for("library.bookshelf"))
 
 @books_bp.route("/<int:book_id>")
@@ -347,5 +356,23 @@ def delete_book(book_id):
     ReadingLog.query.filter_by(book_id=book.id).delete()
     db.session.delete(book)
     db.session.commit()
+
+    return redirect(url_for("library.bookshelf"))
+
+@books_bp.route("/delete-books", methods=["POST"])
+@login_required
+def delete_books():
+    """Remove multiple books (and their reading logs) selected via checkboxes."""
+    user_id = session["user_id"]
+    book_ids = request.form.getlist("book_id", type=int)
+
+    if book_ids:
+        books = Book.query.filter(
+            Book.id.in_(book_ids), Book.user_id == user_id
+        ).all()
+        for book in books:
+            ReadingLog.query.filter_by(book_id=book.id).delete()
+            db.session.delete(book)
+        db.session.commit()
 
     return redirect(url_for("library.bookshelf"))

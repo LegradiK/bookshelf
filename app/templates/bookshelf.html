@@ -64,9 +64,12 @@
 </form>
 
 {% if books %}
-<div class="book-grid">
+<div class="book-grid" id="book-grid">
   {% for book in books %}
   <div class="book-card" id="book-{{ loop.index0 }}">
+    <label class="book-select-label">
+      <input type="checkbox" class="book-select" data-id="{{ book.id }}">
+    </label>
     <form method="post" action="{{ url_for('books.delete_book', book_id=book.id) }}" class="delete-book-form"
       onsubmit="return confirm('Remove this book from your shelf?');">
       <button type="submit" class="delete-book-btn" aria-label="Remove {{ book.title }} from shelf">
@@ -86,9 +89,6 @@
         {% else %}
         <div class="book-cover-placeholder">{{ book.title[:1] }}</div>
         {% endif %}
-        {% if book.status == 'finished' and book.times_read > 1 %}
-        <span class="reread-badge">Read {{ book.times_read }}&times;</span>
-        {% endif %}
       </div>
       <p class="book-title">{{ book.title }}</p>
       <p class="book-author">{{ book.author }}</p>
@@ -97,11 +97,16 @@
       {% else %}
       <p class="no-review">No reviews yet</p>
       {% endif %}
-      <span class="status-pill status-{{ book.status }}">
-        {% if book.status == 'reading' %}Reading now
-        {% elif book.status == 'finished' %}Finished{% if book.times_read > 1 %} &middot; {{ book.times_read }}&times;{% endif %}
-        {% else %}Want to read{% endif %}
-      </span>
+      <div class="badge-row">
+        {% if book.times_read > 1 %}
+          <span class="reread-badge">Read &times;{{ book.times_read }}</span>
+        {% endif %}
+        <span class="status-pill status-{{ book.status }}">
+          {% if book.status == 'reading' %}Reading now
+          {% elif book.status == 'finished' %}Finished
+          {% else %}Want to read{% endif %}
+        </span>
+      </div>
     </a>
   </div>
   {% endfor %}
@@ -122,4 +127,7 @@
 <a href="{{ url_for('library.search_page') }}" class="btn-primary">+ Add a book</a>
 </div>
 {% endif %}
+
+<form method="post" action="{{ url_for('books.delete_books') }}" id="bulk-delete-form"></form>
+<script src="{{ url_for('static', filename='js/bulk-select.js') }}"></script>
 {% endblock %}

@@ -5,15 +5,27 @@
 <h1 class="page-title">Find a book</h1>
 <p class="page-subtitle">Type a title and/or author to search.</p>
 
-<div class="search-box">
-<input
-type="text"
-id="search-input"
-class="search-input"
-placeholder="e.g. Hamlet William Shakespeare"
-autofocus
-autocomplete="off"
-    >
+<div class="search-area">
+    <span class="search-box">
+        <input
+        type="text"
+        id="search-input"
+        class="search-input"
+        placeholder="e.g. Hamlet William Shakespeare"
+        autofocus
+        autocomplete="off"
+            >
+    </span>
+
+    <span class="status-select-bar">
+        <label for="reading-status-select">Save books as</label>
+        <select id="reading-status-select">
+            <option value="" disabled selected>Reading status</option>
+            <option value="want_to_read">Want to read</option>
+            <option value="reading">Reading</option>
+            <option value="finished">Finished</option>
+        </select>
+    </span>
 </div>
 
 <div id="search-status" class="search-status"></div>
