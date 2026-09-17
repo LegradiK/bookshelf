@@ -15,6 +15,7 @@ class Book(db.Model):
     status = db.Column(db.String(20), default="want_to_read")
     # status: "want_to_read", "reading", "finished"
     added_on = db.Column(db.Date, default=date.today)
+    times_read = db.Column(db.Integer, default=0, nullable=False)
 
     logs = db.relationship(
         "ReadingLog", backref="book", lazy=True, cascade="all, delete-orphan",
@@ -24,11 +25,7 @@ class Book(db.Model):
     __table_args__ = (
         db.UniqueConstraint("user_id", "google_books_id", name="uq_user_google_book"),
     )
-
-    @property
-    def times_read(self):
-        return len(self.logs)
-
+    
     @property
     def latest_log(self):
         return self.logs[0] if self.logs else None

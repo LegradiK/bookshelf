@@ -6,6 +6,7 @@ function initBookSearch() {
 
   let debounceTimer = null;
   let activeController = null;
+  const selected = new Map(); // google_books_id -> true, tracks checked cards across re-renders
 
   input.addEventListener("input", () => {
     const query = input.value.trim();
@@ -22,8 +23,6 @@ function initBookSearch() {
   });
 
   async function runSearch(query) {
-    // Cancel any still-in-flight request so a fast typist doesn't stack up
-    // calls against Google's rate limit.
     if (activeController) {
       activeController.abort();
     }
@@ -48,8 +47,9 @@ function initBookSearch() {
 
       statusEl.textContent = `${data.length} result${data.length === 1 ? "" : "s"}`;
       resultsEl.innerHTML = data.map(renderResultCard).join("");
+      updateBulkBar();
     } catch (err) {
-      if (err.name === "AbortError") return; // superseded by a newer search, ignore
+      if (err.name === "AbortError") return;
       statusEl.textContent = "Something went wrong searching. Try again.";
     }
   }
@@ -59,17 +59,22 @@ function initBookSearch() {
       ? `<img src="${escapeAttr(book.cover_url)}" alt="Cover of ${escapeAttr(book.title)}">`
       : "";
     const yearText = book.year ? ` (${book.year})` : "";
+    const id = escapeAttr(book.google_books_id || "");
+    const checked = selected.has(book.google_books_id) ? "checked" : "";
 
     return `
       <div class="result-card">
+        <label class="result-checkbox-label">
+          <input type="checkbox" class="result-select" data-id="${id}" ${checked}>
+        </label>
         <div class="result-cover">${cover}</div>
         <div class="result-info">
           <p class="result-title">${escapeHtml(book.title)}${yearText}</p>
           <p class="result-author">${escapeHtml(book.author)}</p>
           <div class="result-actions">
-${addBookForm(book, "want_to_read", "Want to read")}
-${addBookForm(book, "reading", "Reading")}
-${addBookForm(book, "finished", "Finished", true)}
+            ${addBookForm(book, "want_to_read", "Want to read")}
+            ${addBookForm(book, "reading", "Reading")}
+            ${addBookForm(book, "finished", "Finished", true)}
           </div>
         </div>
       </div>
@@ -89,6 +94,67 @@ ${addBookForm(book, "finished", "Finished", true)}
         <button type="submit" class="btn-small${primary ? " primary" : ""}">${label}</button>
       </form>
     `;
+  }
+
+  // Track checkbox changes via event delegation, since cards are re-rendered on every search
+  resultsEl.addEventListener("change", (e) => {
+    if (!e.target.classList.contains("result-select")) return;
+    const id = e.target.dataset.id;
+    if (e.target.checked) {
+      selected.set(id, true);
+    } else {
+      selected.delete(id);
+    }
+    updateBulkBar();
+  });
+
+  function updateBulkBar() {
+    let bar = document.getElementById("bulk-add-bar");
+    if (!bar) {
+      bar = document.createElement("div");
+      bar.id = "bulk-add-bar";
+      bar.className = "bulk-add-bar";
+      bar.innerHTML = `
+        <span id="bulk-count"></span>
+        <select id="bulk-status">
+          <option value="want_to_read">Want to read</option>
+          <option value="reading">Reading</option>
+          <option value="finished">Finished</option>
+        </select>
+        <button type="button" id="bulk-add-btn" class="btn-primary">Add selected books</button>
+      `;
+      document.body.appendChild(bar);
+      document.getElementById("bulk-add-btn").addEventListener("click", submitBulkAdd);
+    }
+
+    const count = selected.size;
+    bar.style.display = count > 0 ? "flex" : "none";
+    document.getElementById("bulk-count").textContent = `${count} selected`;
+  }
+
+  function submitBulkAdd() {
+    const status = document.getElementById("bulk-status").value;
+
+    const form = document.createElement("form");
+    form.method = "post";
+    form.action = "/add-books";
+
+    selected.forEach((_, id) => {
+      const idInput = document.createElement("input");
+      idInput.type = "hidden";
+      idInput.name = "google_books_id";
+      idInput.value = id;
+      form.appendChild(idInput);
+    });
+
+    const statusInput = document.createElement("input");
+    statusInput.type = "hidden";
+    statusInput.name = "status";
+    statusInput.value = status;
+    form.appendChild(statusInput);
+
+    document.body.appendChild(form);
+    form.submit(); // real navigation — lets the server's redirect() work as normal
   }
 
   function escapeHtml(str) {

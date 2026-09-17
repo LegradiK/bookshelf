@@ -9,8 +9,6 @@ from app.auth.routes import login_required
 
 GOOGLE_BOOKS_API = "https://www.googleapis.com/books/v1/volumes"
 
-load_dotenv('data.env')
-
 @books_bp.route("/search-books")
 def search_books():
     """AJAX endpoint: search Google Books and return simplified results for the search page."""
@@ -59,6 +57,22 @@ def _extract_isbn(volume_info):
     isbn_13 = next((i["identifier"] for i in identifiers if i.get("type") == "ISBN_13"), None)
     isbn_10 = next((i["identifier"] for i in identifiers if i.get("type") == "ISBN_10"), None)
     return isbn_13 or isbn_10
+
+def _fetch_volume_details(google_books_id):
+    """Fetch a single volume by ID — used when bulk-adding from search results."""
+    resp = requests.get(f"{GOOGLE_BOOKS_API}/{google_books_id}", timeout=5)
+    resp.raise_for_status()
+    info = resp.json().get("volumeInfo", {})
+    image_links = info.get("imageLinks", {})
+
+    return {
+        "google_books_id": google_books_id,
+        "title": info.get("title", "Untitled"),
+        "author": ", ".join(info.get("authors", [])) or "Unknown author",
+        "cover_url": image_links.get("thumbnail"),
+        "isbn": _extract_isbn(info),
+        "categories": ", ".join(info.get("categories", [])),
+    }
 
 
 # Subject strings that show up in Open Library data but aren't really genres.
@@ -174,6 +188,18 @@ def update_genres(book_id):
     db.session.commit()
     return redirect(url_for("books.detail", book_id=book_id))
 
+@books_bp.route("/<int:book_id>/status", methods=["POST"])
+@login_required
+def update_status(book_id):
+    """Update a book's shelf status (want_to_read / reading / finished)."""
+    book = Book.query.filter_by(id=book_id, user_id=session["user_id"]).first_or_404()
+    new_status = request.form.get("status")
+
+    if new_status in {"want_to_read", "reading", "finished"}:
+        book.status = new_status
+        db.session.commit()
+
+    return redirect(url_for("books.detail", book_id=book.id))
 
 @books_bp.route("/add-book", methods=["POST"])
 @login_required
@@ -210,6 +236,43 @@ def add_book():
 
     return redirect(url_for("books.detail", book_id=book.id))
 
+@books_bp.route("/add-books", methods=["POST"])
+@login_required
+def add_books():
+    """Add multiple books selected via checkboxes on the search results page."""
+    user_id = session["user_id"]
+    google_books_ids = request.form.getlist("google_books_id")
+    status = request.form.get("status", "want_to_read")
+    if status not in {"want_to_read", "reading", "finished"}:
+        status = "want_to_read"
+
+    for google_books_id in google_books_ids:
+        existing = Book.query.filter_by(google_books_id=google_books_id, user_id=user_id).first()
+        if existing:
+            continue  # already on this user's shelf — skip rather than duplicate
+
+        try:
+            details = _fetch_volume_details(google_books_id)
+        except requests.RequestException:
+            continue  # skip any book whose lookup fails, rather than failing the whole batch
+
+        genres = get_genres_from_open_library(details["isbn"], google_categories=details["categories"])
+        categories = ", ".join(genres) if genres else details["categories"]
+
+        book = Book(
+            user_id=user_id,
+            google_books_id=details["google_books_id"],
+            isbn=details["isbn"],
+            title=details["title"],
+            author=details["author"],
+            cover_url=details["cover_url"],
+            status=status,
+            categories=categories,
+        )
+        db.session.add(book)
+
+    db.session.commit()
+    return redirect(url_for("library.bookshelf"))
 
 @books_bp.route("/<int:book_id>")
 @login_required
@@ -226,15 +289,15 @@ def detail(book_id):
     )
 
 
-@books_bp.route("/<int:book_id>/status", methods=["POST"])
+@books_bp.route("/<int:book_id>/times-read", methods=["POST"])
 @login_required
-def update_status(book_id):
-    """Update a book's shelf status (want_to_read / reading / finished)."""
+def update_times_read(book_id):
+    """Set how many times this book has been read, entered directly by the user."""
     book = Book.query.filter_by(id=book_id, user_id=session["user_id"]).first_or_404()
-    new_status = request.form.get("status")
 
-    if new_status in {"want_to_read", "reading", "finished"}:
-        book.status = new_status
+    times_read = request.form.get("times_read", type=int)
+    if times_read is not None and times_read >= 0:
+        book.times_read = times_read
         db.session.commit()
 
     return redirect(url_for("books.detail", book_id=book.id))
