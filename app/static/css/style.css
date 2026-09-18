@@ -599,7 +599,8 @@ a { text-decoration: none; color: inherit; }
   padding: 0.5rem 1rem;
   border-radius: 999px;
   text-decoration: none;
-  margin-bottom: 1.5rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 
 /* ---------- Search ---------- */

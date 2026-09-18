@@ -305,9 +305,13 @@ def update_times_read(book_id):
     book = Book.query.filter_by(id=book_id, user_id=session["user_id"]).first_or_404()
 
     times_read = request.form.get("times_read", type=int)
-    if times_read is not None and times_read >= 0:
+
+    if book.status != 'finished':
+        book.times_read = 0
+    elif times_read is not None and times_read >= 1:
         book.times_read = times_read
-        db.session.commit()
+
+    db.session.commit()
 
     return redirect(url_for("books.detail", book_id=book.id))
 
