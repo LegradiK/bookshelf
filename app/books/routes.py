@@ -2,7 +2,7 @@ import requests
 import os
 from dotenv import load_dotenv
 from datetime import date, datetime
-from flask import render_template, request, redirect, url_for, jsonify, current_app, session, abort
+from flask import render_template, flash, request, redirect, url_for, jsonify, current_app, session
 
 from . import books_bp
 from app.models import db, Book, ReadingLog
@@ -223,14 +223,15 @@ def add_book():
 
     existing = Book.query.filter_by(google_books_id=google_books_id, user_id=user_id).first()
     if existing:
+        flash(f'"{existing.title}" by {existing.author} is already on your bookshelf.<br>'
+              f'Read it again? Update the times read count on its page.', "info")
         return redirect(url_for("books.detail", book_id=existing.id))
 
     status = request.form.get("status", "want_to_read")
     if status not in {"want_to_read", "reading", "finished"}:
         status = "want_to_read"
 
-    if status == "finished":
-        times_read = 1
+    times_read = 1 if status == "finished" else 0
 
     isbn = request.form.get("isbn", "")
     google_categories = request.form.get("categories", "")
@@ -263,13 +264,18 @@ def add_books():
     if status not in {"want_to_read", "reading", "finished"}:
         status = "want_to_read"
 
-    if status == "finished":
-        times_read = 1
+    times_read = 1 if status == "finished" else 0
 
     skipped = 0
+    duplicates = []
+    reread_duplicates = []
     for google_books_id in google_books_ids:
         existing = Book.query.filter_by(google_books_id=google_books_id, user_id=user_id).first()
         if existing:
+            if status == "finished":
+                reread_duplicates.append(f"{existing.title} - {existing.author}")
+            else:
+                duplicates.append(f"{existing.title} - {existing.author}")
             continue  # already on this user's shelf — skip rather than duplicate
 
         try:
@@ -290,13 +296,23 @@ def add_books():
             cover_url=details["cover_url"],
             status=status,
             categories=categories,
-            times_read=times_read
+            times_read=times_read,
         )
         db.session.add(book)
 
     db.session.commit()
+
+    if duplicates:
+        flash("Already on your bookshelf (read it again? update times read on each book's page): " + "; ".join(duplicates), "info")
+    if reread_duplicates:
+        flash(
+            "Already on your bookshelf (read it again? update times read on each book's page): "
+            + "; ".join(reread_duplicates),
+            "info",
+        )
     if skipped:
-        print(f"{skipped} book(s) couldn't be added — try again in a moment.")
+        flash(f"{skipped} book(s) couldn't be added — try again in a moment.", "warning")
+
     return redirect(url_for("library.bookshelf"))
 
 @books_bp.route("/<int:book_id>")

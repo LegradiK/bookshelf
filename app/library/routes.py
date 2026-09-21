@@ -67,13 +67,13 @@ def bookshelf():
         query = query.filter(Book.categories.ilike(f"%{selected_genre}%"))
     if selected_author:
         query = query.filter(Book.author == selected_author)
-        if query_text:
-            query = query.filter(
-                db.or_(
-                    Book.title.ilike(f"%{query_text}%"),
-                    Book.author.ilike(f"%{query_text}%"),
-                )
-        )
+    if query_text:
+        query = query.filter(
+            db.or_(
+                Book.title.ilike(f"%{query_text}%"),
+                Book.author.ilike(f"%{query_text}%"),
+            )
+    )
 
     if sort == "title":
         query = query.order_by(Book.title.asc())

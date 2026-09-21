@@ -113,7 +113,7 @@
 </div>
 {% if has_more %}
 <div class="show-more-wrap">
-  <a href="{{ url_for('library.bookshelf', status=active_status, sort=sort, genre=selected_genre, author=selected_author, page=page + 1) }}#book-{{ books|length }}"
+  <a href="{{ url_for('library.bookshelf', status=active_status, sort=sort, genre=selected_genre, author=selected_author, q=query, page=page + 1) }}#book-{{ books|length }}"
      class="show-more-btn">
     Show more
   </a>

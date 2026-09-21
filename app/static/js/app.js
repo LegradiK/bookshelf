@@ -1,6 +1,7 @@
 function initBookSearch() {
   const input = document.getElementById("search-input");
   const statusEl = document.getElementById("search-status");
+  const messageEl = document.getElementById("search-message");
   const resultsEl = document.getElementById("search-results");
   const globalStatusSelect = document.getElementById("reading-status-select");
   if (!input) return;
@@ -19,13 +20,14 @@ function initBookSearch() {
     clearTimeout(debounceTimer);
     resultsEl.innerHTML = "";
     removeLoadMoreButton();
+    statusEl.textContent = "";
 
     if (query.length < 2) {
-      statusEl.textContent = "";
+      messageEl.textContent = "";
       return;
     }
 
-    statusEl.textContent = "Searching...";
+    messageEl.textContent = "Searching...";
     debounceTimer = setTimeout(() => runSearch(query, { fresh: true }), 600);
   });
 
@@ -48,7 +50,8 @@ function initBookSearch() {
       const data = await res.json();
 
       if (data.error) {
-        statusEl.textContent = data.error;
+        messageEl.textContent = data.error;
+        statusEl.textContent = "";
         removeLoadMoreButton();
         return;
       }
@@ -57,7 +60,8 @@ function initBookSearch() {
       totalItems = data.total_items || 0;
 
       if (fresh && !items.length) {
-        statusEl.textContent = "No books found. Try a different spelling.";
+        messageEl.textContent = "No books found. Try a different spelling.";
+        statusEl.textContent = "";
         resultsEl.innerHTML = "";
         removeLoadMoreButton();
         return;
@@ -72,13 +76,14 @@ function initBookSearch() {
       currentStart += items.length;
 
       const shownCount = resultsEl.querySelectorAll(".book-card").length;
+      messageEl.textContent = "";   // add this
       statusEl.textContent = `${shownCount} of ${totalItems} result${totalItems === 1 ? "" : "s"}`;
 
       updateLoadMoreButton();
       updateBulkBar();
     } catch (err) {
       if (err.name === "AbortError") return;
-      statusEl.textContent = "Something went wrong searching. Try again.";
+      messageEl.textContent = "Something went wrong while searching. Try again.";
     }
   }
 
@@ -153,7 +158,7 @@ function removeLoadMoreButton() {
     if (!globalStatusSelect.value) {
       e.preventDefault();
       globalStatusSelect.focus();
-      statusEl.textContent = "Pick a reading status first.";
+      messageEl.textContent = "Pick a reading status first.";
       return;
     }
     form.querySelector(".status-carrier").value = globalStatusSelect.value;
@@ -192,7 +197,7 @@ function removeLoadMoreButton() {
   function submitBulkAdd() {
     if (!globalStatusSelect.value) {
       globalStatusSelect.focus();
-      statusEl.textContent = "Pick a reading status first.";
+      messageEl.textContent = "Pick a reading status first.";
       return;
     }
     const status = globalStatusSelect.value;

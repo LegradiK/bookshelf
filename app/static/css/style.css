@@ -615,6 +615,14 @@ a { text-decoration: none; color: inherit; }
 }
 
 /* ---------- Search ---------- */
+.flash-messages {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #D79334;
+  white-space: pre-line;
+}
+
 .search-input,
 #reading-status-select {
   width: 100%;
@@ -637,7 +645,25 @@ a { text-decoration: none; color: inherit; }
   border-color: var(--primary);
 }
 
-.search-status { color: var(--text-secondary); font-size: 14px; min-height: 1.2em; margin-bottom: 0.5rem; }
+.search-status { 
+  color: var(--text-secondary); 
+  font-size: 14px; 
+  min-height: 1.2em; 
+  margin-bottom: 0.5rem; 
+}
+
+.search-message { 
+  font-size: 17px; 
+  min-height: 1.2em; 
+  margin-bottom: 0.8rem;
+  font-weight: 700;
+  color: #7B2E18;
+}
+
+#search-message:empty,
+#search-status:empty {
+  display: none;
+}
 
 .search-results {
   display: grid;
