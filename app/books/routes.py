@@ -3,9 +3,9 @@ import os
 from dotenv import load_dotenv
 from datetime import date, datetime
 from flask import render_template, flash, request, redirect, url_for, jsonify, current_app, session
-
+from markupsafe import escape
 from . import books_bp
-from app.models import db, Book, ReadingLog
+from app.models import db, Book, ReadingLog, User
 from app.auth.routes import login_required
 from pathlib import Path
 
@@ -303,11 +303,15 @@ def add_books():
     db.session.commit()
 
     if duplicates:
-        flash("Already on your bookshelf (read it again? update times read on each book's page): " + "; ".join(duplicates), "info")
-    if reread_duplicates:
+        items = "".join(f"<li>{escape(d)}</li>" for d in duplicates)
         flash(
-            "Already on your bookshelf (read it again? update times read on each book's page): "
-            + "; ".join(reread_duplicates),
+            f"Already on your bookshelf:<ul>{items}</ul>",
+            "info",
+        )
+    if reread_duplicates:
+        items = "".join(f"<li>{escape(d)}</li>" for d in reread_duplicates)
+        flash(
+            f"Already on your bookshelf (read it again? update times read on each book's page):<ul>{items}</ul>",
             "info",
         )
     if skipped:
@@ -319,6 +323,7 @@ def add_books():
 @login_required
 def detail(book_id):
     """Book detail page: status, times read, and the reading log history."""
+    user = User.query.get(session["user_id"])
     book = Book.query.filter_by(id=book_id, user_id=session["user_id"]).first_or_404()
 
     return render_template(
@@ -327,6 +332,7 @@ def detail(book_id):
         logs=book.logs,
         times_read=book.times_read,
         today=date.today(),
+        user_name=user.username if user else None
     )
 
 

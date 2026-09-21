@@ -8,14 +8,23 @@
 </div>
 
 {% if next_milestone %}
-<div class="progress-wrap">
-  <div class="progress-top">
-    <p class="progress-label">{{ books_to_next }} book{{ 's' if books_to_next != 1 else '' }} to reach next milestone</p>
-    <p class="progress-fraction">{{ finished_count }} / {{ next_milestone }}</p>
+<div class="achievement-tracker">
+  <div class="progress-wrap">
+    <div class="progress-top">
+      <p class="progress-label">{{ books_to_next }} book{{ 's' if books_to_next != 1 else '' }} to reach next milestone</p>
+      <p class="progress-fraction">{{ finished_count }} / {{ next_milestone }}</p>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-bar-fill" style="width: {{ progress_pct }}%;"></div>
+    </div>
   </div>
-  <div class="progress-bar">
-    <div class="progress-bar-fill" style="width: {{ progress_pct }}%;"></div>
-  </div>
+  {% if achieved %}
+    <div class="certificate-cta">
+      <a href="{{ url_for('library.achievement_certificate') }}" class="btn-certificate">
+        🏆 Get my certificate!
+      </a>
+    </div>
+  {% endif %}
 </div>
 {% else %}
 <div class="progress-complete">

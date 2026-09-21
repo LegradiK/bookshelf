@@ -6,6 +6,15 @@ from app.colours import COLOUR_GROUPS, COLOURS_BY_ID, VALID_HEXES, DEFAULT_HEX
 from app.colour_shades import site_palette
 from app.auth.routes import login_required
 
+import io
+from datetime import date
+from flask import send_file
+from reportlab.lib.pagesizes import landscape, letter
+from reportlab.lib.colors import HexColor
+from reportlab.pdfgen import canvas
+from reportlab.pdfbase.pdfmetrics import stringWidth
+
+
 def _current_colour_hex() -> str:
     setting = Setting.get()
     if setting.colour_hex and setting.colour_hex in VALID_HEXES:
@@ -169,4 +178,142 @@ def achievements():
         books_to_next=books_to_next,
         progress_pct=progress_pct,
         user_name=user.username if user else None
+    )
+
+def _draw_star(c, cx, cy, size, fill_color):
+    """Draw a simple 5-point star centered at (cx, cy)."""
+    import math
+    points = []
+    for i in range(10):
+        angle = math.pi / 2 + i * math.pi / 5
+        r = size if i % 2 == 0 else size * 0.4
+        points.append((cx + r * math.cos(angle), cy + r * math.sin(angle)))
+
+    c.setFillColor(fill_color)
+    c.setStrokeColor(fill_color)
+    path = c.beginPath()
+    path.moveTo(*points[0])
+    for x, y in points[1:]:
+        path.lineTo(x, y)
+    path.close()
+    c.drawPath(path, fill=1, stroke=0)
+
+
+@library_bp.route("/achievements/certificate")
+@login_required
+def achievement_certificate():
+    user = User.query.get(session["user_id"])
+
+    finished_count = Book.query.filter(
+        Book.user_id == session["user_id"],
+        Book.status == "finished"
+    ).count()
+
+    achieved = [m for m in MILESTONES if finished_count >= m]
+    if not achieved:
+        abort(404)  # nothing earned yet — no certificate to generate
+
+    milestone = achieved[-1]  # most recent (highest) milestone reached
+
+    buffer = io.BytesIO()
+    page_size = landscape(letter)
+    c = canvas.Canvas(buffer, pagesize=page_size)
+    width, height = page_size
+
+    # Palette — bright and friendly
+    gold = HexColor("#F5A623")
+    teal = HexColor("#2FB6A9")
+    coral = HexColor("#FF6F61")
+    purple = HexColor("#8E6FD8")
+    navy = HexColor("#2E3A59")
+    star_colors = [gold, teal, coral, purple]
+
+    # Background
+    c.setFillColor(HexColor("#FFFBF2"))
+    c.rect(0, 0, width, height, fill=1, stroke=0)
+
+    # Decorative border (double rounded rect)
+    margin = 24
+    c.setStrokeColor(teal)
+    c.setLineWidth(6)
+    c.roundRect(margin, margin, width - 2 * margin, height - 2 * margin, 24, fill=0, stroke=1)
+    c.setStrokeColor(gold)
+    c.setLineWidth(2)
+    c.roundRect(margin + 10, margin + 10, width - 2 * (margin + 10), height - 2 * (margin + 10), 18, fill=0, stroke=1)
+
+    # Scattered stars along the top and bottom
+    star_positions = [
+        (80, height - 55), (width - 80, height - 55),
+        (80, 55), (width - 80, 55),
+        (width / 2 - 160, height - 40), (width / 2 + 160, height - 40),
+    ]
+    for i, (sx, sy) in enumerate(star_positions):
+        _draw_star(c, sx, sy, 14, star_colors[i % len(star_colors)])
+
+    # Title
+    c.setFillColor(navy)
+    c.setFont("Helvetica-Bold", 42)
+    title = "Certificate of Achievement"
+    c.drawCentredString(width / 2, height - 150, title)
+
+    # Trophy-ish flourish: a big star above the title
+    _draw_star(c, width / 2, height - 200, 22, gold)
+
+    # Subtitle
+    c.setFont("Helvetica", 22)
+    c.setFillColor(navy)
+    c.drawCentredString(width / 2, height - 250, "This is a certificate for")
+
+    # Name
+    c.setFont("Helvetica-Bold", 36)
+    c.setFillColor(coral)
+    name = user.username if user else "Reader"
+    c.drawCentredString(width / 2, height - 310, name)
+    c.setLineWidth(1)
+    c.setStrokeColor(navy)
+    line_w = stringWidth(name, "Helvetica", 12) + 40
+    c.line(width / 2 - line_w / 2, 80, width / 2 + line_w / 2, 80)
+
+    # Achievement line
+    c.setFont("Helvetica", 20)
+    c.setFillColor(navy)
+    achievement_text = f"Awarded for a wonderful love of reading and the curiosity to explore {milestone} book{'s' if milestone != 1 else ''}!"
+    c.drawCentredString(width / 2, height - 355, achievement_text)
+
+    # Encouraging line
+    c.setFont("Helvetica-Oblique-Bold", 14)
+    c.setFillColor(teal)
+
+    lines = [
+    "You've shown real dedication and a love of stories.",
+    "Every book you read makes your imagination even bigger.",
+    "We're so proud of you!",
+    ]
+
+    line_height = 22  # spacing between lines, in points — adjust to taste
+    start_y = height - 410
+
+    for i, line in enumerate(lines):
+        c.drawCentredString(width / 2, start_y - (i * line_height), line)
+    
+    # Date, bottom center
+    c.setFont("Helvetica", 12)
+    c.setFillColor(navy)
+    today_str = date.today().strftime("%d %B %Y")
+    c.drawCentredString(width / 2, 90, today_str)
+    c.setLineWidth(1)
+    c.setStrokeColor(navy)
+    line_w = stringWidth(today_str, "Helvetica", 12) + 40
+    c.line(width / 2 - line_w / 2, 80, width / 2 + line_w / 2, 80)
+
+    c.showPage()
+    c.save()
+    buffer.seek(0)
+
+    filename = f"{name.replace(' ', '_')}_certificate_{milestone}_books.pdf"
+    return send_file(
+        buffer,
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=filename,
     )

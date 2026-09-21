@@ -53,12 +53,12 @@
           {% if messages %}
             <div class="flash-messages">
               {% for category, message in messages %}
-                <div class="flash flash-{{ category }}">{{ message }}</div>
+                <div class="flash flash-{{ category }}">{{ message | safe }}</div>
               {% endfor %}
             </div>
           {% endif %}
         {% endwith %}
-        
+
         {% block content %}{% endblock %}
       </main>
     </div>
