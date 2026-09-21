@@ -9,10 +9,16 @@ function initBookSearch() {
   let activeController = null;
   const selected = new Map(); // google_books_id -> true, tracks checked cards across re-renders
 
+  let currentQuery = "";
+  let currentStart = 0;
+  let totalItems = 0;
+  const PAGE_SIZE = 40;
+
   input.addEventListener("input", () => {
     const query = input.value.trim();
     clearTimeout(debounceTimer);
     resultsEl.innerHTML = "";
+    removeLoadMoreButton();
 
     if (query.length < 2) {
       statusEl.textContent = "";
@@ -20,40 +26,89 @@ function initBookSearch() {
     }
 
     statusEl.textContent = "Searching...";
-    debounceTimer = setTimeout(() => runSearch(query), 600);
+    debounceTimer = setTimeout(() => runSearch(query, { fresh: true }), 600);
   });
 
-  async function runSearch(query) {
+  async function runSearch(query, { fresh }) {
     if (activeController) {
       activeController.abort();
     }
     activeController = new AbortController();
 
+    if (fresh) {
+      currentQuery = query;
+      currentStart = 0;
+    }
+
     try {
-      const res = await fetch(`/search-books?q=${encodeURIComponent(query)}`, {
-        signal: activeController.signal,
-      });
+      const res = await fetch(
+        `/search-books?q=${encodeURIComponent(currentQuery)}&start=${currentStart}`,
+        { signal: activeController.signal }
+      );
       const data = await res.json();
 
       if (data.error) {
         statusEl.textContent = data.error;
+        removeLoadMoreButton();
         return;
       }
 
-      if (!data.length) {
+      const items = data.items || [];
+      totalItems = data.total_items || 0;
+
+      if (fresh && !items.length) {
         statusEl.textContent = "No books found. Try a different spelling.";
         resultsEl.innerHTML = "";
+        removeLoadMoreButton();
         return;
       }
 
-      statusEl.textContent = `${data.length} result${data.length === 1 ? "" : "s"}`;
-      resultsEl.innerHTML = data.map(renderResultCard).join("");
+      if (fresh) {
+        resultsEl.innerHTML = items.map(renderResultCard).join("");
+      } else {
+        resultsEl.insertAdjacentHTML("beforeend", items.map(renderResultCard).join(""));
+      }
+
+      currentStart += items.length;
+
+      const shownCount = resultsEl.querySelectorAll(".book-card").length;
+      statusEl.textContent = `${shownCount} of ${totalItems} result${totalItems === 1 ? "" : "s"}`;
+
+      updateLoadMoreButton();
       updateBulkBar();
     } catch (err) {
       if (err.name === "AbortError") return;
       statusEl.textContent = "Something went wrong searching. Try again.";
     }
   }
+
+function updateLoadMoreButton() {
+  removeLoadMoreButton();
+  if (currentStart >= totalItems) return; // no more pages
+
+  const wrap = document.createElement("div");
+  wrap.id = "load-more-wrap";
+  wrap.className = "load-more-wrap";
+
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.id = "load-more-btn";
+  btn.className = "load-more-btn";
+  btn.textContent = "Load more";
+  btn.addEventListener("click", () => {
+    btn.disabled = true;
+    btn.textContent = "Loading...";
+    runSearch(currentQuery, { fresh: false });
+  });
+
+  wrap.appendChild(btn);
+  resultsEl.insertAdjacentElement("afterend", wrap);
+}
+
+function removeLoadMoreButton() {
+  const existing = document.getElementById("load-more-wrap");
+  if (existing) existing.remove();
+}
 
   function renderResultCard(book) {
     const coverInner = book.cover_url
@@ -91,8 +146,6 @@ function initBookSearch() {
     `;
   }
 
-  // Fill each form's hidden status field from the global select right before it submits,
-  // and block submission if no status has been chosen yet.
   resultsEl.addEventListener("submit", (e) => {
     const form = e.target;
     if (!form.classList.contains("result-add-form")) return;
@@ -106,7 +159,6 @@ function initBookSearch() {
     form.querySelector(".status-carrier").value = globalStatusSelect.value;
   });
 
-  // Track checkbox changes via event delegation, since cards are re-rendered on every search
   resultsEl.addEventListener("change", (e) => {
     if (!e.target.classList.contains("result-select")) return;
     const id = e.target.dataset.id;
@@ -164,7 +216,7 @@ function initBookSearch() {
     form.appendChild(statusInput);
 
     document.body.appendChild(form);
-    form.submit(); // real navigation — lets the server's redirect() work as normal
+    form.submit();
   }
 
   function escapeHtml(str) {

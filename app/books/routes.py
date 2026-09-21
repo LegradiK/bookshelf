@@ -1,4 +1,5 @@
 import requests
+import os
 from dotenv import load_dotenv
 from datetime import date, datetime
 from flask import render_template, request, redirect, url_for, jsonify, current_app, session, abort
@@ -6,23 +7,28 @@ from flask import render_template, request, redirect, url_for, jsonify, current_
 from . import books_bp
 from app.models import db, Book, ReadingLog
 from app.auth.routes import login_required
+from pathlib import Path
 
-GOOGLE_BOOKS_API = "https://www.googleapis.com/books/v1/volumes"
+GOOGLE_BOOKS_LINK = "https://www.googleapis.com/books/v1/volumes"
+
+load_dotenv(Path(__file__).resolve().parents[2] / "data.env")
+GOOGLE_BOOKS_API_KEY = os.environ.get("GOOGLE_BOOKS_API_KEY")
 
 @books_bp.route("/search-books")
 def search_books():
-    """AJAX endpoint: search Google Books and return simplified results for the search page."""
     q = request.args.get("q", "").strip()
     if not q:
-        return jsonify([])
+        return jsonify({"items": [], "total_items": 0})
+
+    start_index = request.args.get("start", 0, type=int)
 
     try:
-        params = {"q": q, "maxResults": 30}
+        params = {"q": q, "maxResults": 40, "startIndex": start_index}
         api_key = current_app.config.get("GOOGLE_BOOKS_API_KEY")
         if api_key:
             params["key"] = api_key
 
-        resp = requests.get(GOOGLE_BOOKS_API, params=params, timeout=5)
+        resp = requests.get(GOOGLE_BOOKS_LINK, params=params, timeout=5)
         resp.raise_for_status()
     except requests.exceptions.HTTPError as e:
         if e.response is not None and e.response.status_code == 429:
@@ -31,7 +37,9 @@ def search_books():
     except requests.exceptions.RequestException:
         return jsonify({"error": "Something went wrong searching. Try again."})
 
-    items = resp.json().get("items", [])
+    data = resp.json()
+    items = data.get("items", [])
+    total_items = data.get("totalItems", 0)
 
     results = []
     for item in items:
@@ -48,7 +56,7 @@ def search_books():
             "categories": ", ".join(info.get("categories", [])),
         })
 
-    return jsonify(results)
+    return jsonify({"items": results, "total_items": total_items})
 
 
 def _extract_isbn(volume_info):
@@ -65,7 +73,7 @@ def _fetch_volume_details(google_books_id):
     if api_key:
         params["key"] = api_key
 
-    resp = requests.get(f"{GOOGLE_BOOKS_API}/{google_books_id}", params=params, timeout=5)
+    resp = requests.get(f"{GOOGLE_BOOKS_LINK}/{google_books_id}", params=params, timeout=5)
     resp.raise_for_status()
     info = resp.json().get("volumeInfo", {})
     image_links = info.get("imageLinks", {})
@@ -221,6 +229,9 @@ def add_book():
     if status not in {"want_to_read", "reading", "finished"}:
         status = "want_to_read"
 
+    if status == "finished":
+        times_read = 1
+
     isbn = request.form.get("isbn", "")
     google_categories = request.form.get("categories", "")
     genres = get_genres_from_open_library(isbn, google_categories=google_categories)
@@ -235,6 +246,7 @@ def add_book():
         cover_url=request.form.get("cover_url"),
         status=status,
         categories=categories,
+        times_read=times_read,
     )
     db.session.add(book)
     db.session.commit()
@@ -250,6 +262,9 @@ def add_books():
     status = request.form.get("status", "want_to_read")
     if status not in {"want_to_read", "reading", "finished"}:
         status = "want_to_read"
+
+    if status == "finished":
+        times_read = 1
 
     skipped = 0
     for google_books_id in google_books_ids:
@@ -275,6 +290,7 @@ def add_books():
             cover_url=details["cover_url"],
             status=status,
             categories=categories,
+            times_read=times_read
         )
         db.session.add(book)
 

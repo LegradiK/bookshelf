@@ -47,7 +47,7 @@
 </div>
 
 <form method="post" action="{{ url_for('books.update_times_read', book_id=book.id) }}" class="times-read-form">
-    <label for="times_read" class="times_read">Times read
+    <label for="times_read" class="times-read">Times read
         <input type="number" id="times_read" name="times_read" min="0" value="{{ book.times_read }}" class="times-read-box">
     </label>
     <button type="submit" class="btn-small save-btn">Save</button>
