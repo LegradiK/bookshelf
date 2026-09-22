@@ -13,6 +13,7 @@ from reportlab.lib.pagesizes import landscape, letter
 from reportlab.lib.colors import HexColor
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase.pdfmetrics import stringWidth
+import unicodedata
 
 
 def _current_colour_hex() -> str:
@@ -20,6 +21,14 @@ def _current_colour_hex() -> str:
     if setting.colour_hex and setting.colour_hex in VALID_HEXES:
         return setting.colour_hex
     return DEFAULT_HEX
+
+def normalize_text(s: str) -> str:
+    if not s:
+        return ""
+    return "".join(
+        c for c in unicodedata.normalize("NFD", s)
+        if unicodedata.category(c) != "Mn"  # strip combining accent marks
+    ).lower()
 
 @library_bp.route("/")
 def index():
@@ -68,6 +77,7 @@ def bookshelf():
         a for (a,) in db.session.query(Book.author).filter(Book.author.isnot(None))
     })
 
+    # Build the SQL-level query with the filters that DON'T need accent-insensitivity
     query = Book.query.filter(Book.user_id == session["user_id"])
 
     if active_status != "all":
@@ -76,13 +86,6 @@ def bookshelf():
         query = query.filter(Book.categories.ilike(f"%{selected_genre}%"))
     if selected_author:
         query = query.filter(Book.author == selected_author)
-    if query_text:
-        query = query.filter(
-            db.or_(
-                Book.title.ilike(f"%{query_text}%"),
-                Book.author.ilike(f"%{query_text}%"),
-            )
-    )
 
     if sort == "title":
         query = query.order_by(Book.title.asc())
@@ -93,14 +96,24 @@ def bookshelf():
     else:  # "recent" and "stars" both need id.desc() as a base order
         query = query.order_by(Book.id.desc())
 
-    # Now that filters/sort are locked in, count and paginate
-    total_count = query.count()
-    limit = page * PER_PAGE
-    books = query.limit(limit).all()
-    has_more = total_count > limit
+    # Fetch everything matching the SQL filters, then apply text search in Python
+    all_matching = query.all()
+
+    if query_text:
+        norm_q = normalize_text(query_text)
+        all_matching = [
+            b for b in all_matching
+            if norm_q in normalize_text(b.title) or norm_q in normalize_text(b.author)
+        ]
 
     if sort == "stars":
-        books.sort(key=lambda b: b.average_stars or 0, reverse=True)
+        all_matching.sort(key=lambda b: b.average_stars or 0, reverse=True)
+
+    # Now that filtering/sorting are locked in, paginate in Python
+    total_count = len(all_matching)
+    limit = page * PER_PAGE
+    books = all_matching[:limit]
+    has_more = total_count > limit
 
     return render_template(
         "bookshelf.html",
@@ -117,6 +130,63 @@ def bookshelf():
         has_more=has_more,
         user_name=user.username if user else None
     )
+
+import requests
+
+@library_bp.route("/fetch-genres")
+@login_required
+def fetch_genres():
+    """Look up subjects/genres from Open Library, triggered manually by the user."""
+    isbn = request.args.get("isbn", "").strip()
+    title = request.args.get("title", "").strip()
+    author = request.args.get("author", "").strip()
+
+    subjects = []
+
+    # Prefer ISBN lookup — more precise, fewer false matches
+    if isbn:
+        try:
+            resp = requests.get(
+                f"https://openlibrary.org/isbn/{isbn}.json",
+                timeout=5,
+            )
+            if resp.ok:
+                data = resp.json()
+                subjects = data.get("subjects", [])
+        except requests.RequestException:
+            pass
+
+    # Fallback to title/author search if ISBN lookup gave nothing
+    if not subjects and title:
+        try:
+            resp = requests.get(
+                "https://openlibrary.org/search.json",
+                params={"title": title, "author": author, "limit": 1},
+                timeout=5,
+            )
+            if resp.ok:
+                docs = resp.json().get("docs", [])
+                if docs:
+                    subjects = docs[0].get("subject", [])
+        except requests.RequestException:
+            pass
+
+    # Open Library subjects can be noisy/very long lists — trim and dedupe
+    cleaned = []
+    seen = set()
+    for s in subjects:
+        s_clean = s.strip()
+        key = s_clean.lower()
+        if s_clean and key not in seen and len(s_clean) < 40:
+            seen.add(key)
+            cleaned.append(s_clean)
+        if len(cleaned) >= 8:  # cap so it doesn't flood the field
+            break
+
+    if not cleaned:
+        return {"genres": [], "message": "No genres found on Open Library."}
+
+    return {"genres": cleaned}
 
 @library_bp.route("/search")
 @login_required
@@ -198,6 +268,42 @@ def _draw_star(c, cx, cy, size, fill_color):
     path.close()
     c.drawPath(path, fill=1, stroke=0)
 
+def _draw_trophy(c, cx, cy, size, fill_color, outline_color=None):
+    """Draw a simple trophy centered at (cx, cy). `size` controls overall scale."""
+    from reportlab.lib.colors import HexColor
+
+    outline_color = outline_color or fill_color
+    c.setFillColor(fill_color)
+    c.setStrokeColor(outline_color)
+
+    cup_w = size * 1.1
+    cup_h = size * 1.0
+    stem_w = size * 0.22
+    stem_h = size * 0.35
+    base_w = size * 1.0
+    base_h = size * 0.18
+
+    # Cup body (rounded rect)
+    c.roundRect(cx - cup_w / 2, cy, cup_w, cup_h, size * 0.25, fill=1, stroke=0)
+
+    # Handles (two arcs, drawn as open bezier-ish curves via ellipse halves)
+    handle_r = size * 0.32
+    c.setLineWidth(size * 0.12)
+    c.setStrokeColor(fill_color)
+    c.ellipse(cx - cup_w / 2 - handle_r, cy + cup_h * 0.15,
+              cx - cup_w / 2 + handle_r * 0.3, cy + cup_h * 0.75,
+              fill=0, stroke=1)
+    c.ellipse(cx + cup_w / 2 - handle_r * 0.3, cy + cup_h * 0.15,
+              cx + cup_w / 2 + handle_r, cy + cup_h * 0.75,
+              fill=0, stroke=1)
+
+    # Stem
+    c.setFillColor(fill_color)
+    c.rect(cx - stem_w / 2, cy - stem_h, stem_w, stem_h, fill=1, stroke=0)
+
+    # Base
+    c.roundRect(cx - base_w / 2, cy - stem_h - base_h, base_w, base_h, size * 0.06, fill=1, stroke=0)
+
 
 @library_bp.route("/achievements/certificate")
 @login_required
@@ -243,9 +349,25 @@ def achievement_certificate():
 
     # Scattered stars along the top and bottom
     star_positions = [
-        (80, height - 55), (width - 80, height - 55),
-        (80, 55), (width - 80, 55),
-        (width / 2 - 160, height - 40), (width / 2 + 160, height - 40),
+        # 2 stars on the left side (vertically stacked, mid-height)
+        (60, height / 2 - 70),
+        (60, height / 2 + 70),
+
+        # 2 stars on the right side (mirrored)
+        (width - 60, height / 2 - 70),
+        (width - 60, height / 2 + 70),
+
+        # 4 stars along the bottom
+        (85, height - 95),
+        (width / 2 - 160, height - 55),
+        (width / 2 + 160, height - 55),
+        (width - 85, height - 95),
+
+        # 4 stars along the top (mirrored y of bottom row)
+        (85, 95),
+        (width / 2 - 160, 55),
+        (width / 2 + 160, 55),
+        (width - 85, 95),
     ]
     for i, (sx, sy) in enumerate(star_positions):
         _draw_star(c, sx, sy, 14, star_colors[i % len(star_colors)])
@@ -256,8 +378,8 @@ def achievement_certificate():
     title = "Certificate of Achievement"
     c.drawCentredString(width / 2, height - 150, title)
 
-    # Trophy-ish flourish: a big star above the title
-    _draw_star(c, width / 2, height - 200, 22, gold)
+    # Trophy above the title
+    _draw_trophy(c, width / 2, height - 200, 22, gold)
 
     # Subtitle
     c.setFont("Helvetica", 22)
@@ -277,11 +399,11 @@ def achievement_certificate():
     # Achievement line
     c.setFont("Helvetica", 20)
     c.setFillColor(navy)
-    achievement_text = f"Awarded for a wonderful love of reading and the curiosity to explore {milestone} book{'s' if milestone != 1 else ''}!"
+    achievement_text = f"For a wonderful love of reading and the curiosity to explore {milestone} book{'s' if milestone != 1 else ''}!"
     c.drawCentredString(width / 2, height - 355, achievement_text)
 
     # Encouraging line
-    c.setFont("Helvetica-Oblique-Bold", 14)
+    c.setFont("Helvetica-BoldOblique", 14)
     c.setFillColor(teal)
 
     lines = [

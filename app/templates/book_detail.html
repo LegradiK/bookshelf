@@ -44,6 +44,19 @@
     <button type="submit" class="btn-small primary">Save</button>
     <button type="button" class="btn-small" onclick="toggleGenreEdit()">Cancel</button>
     </form>
+    <button
+    type="button"
+    id="fetch-genres-btn"
+    title="Look up genres on Open Library"
+    class="icon-btn"
+    data-isbn="{{ book.isbn or '' }}"
+    data-title="{{ book.title or '' }}"
+    data-author="{{ book.author or '' }}"
+    >
+        <img src="{{ url_for('static', filename='magnifying-glass.png') }}" alt="Search" width="18" height="18">
+    </button>
+    <span id="genre-fetch-status"></span>
+
 </div>
 
 <form method="post" action="{{ url_for('books.update_times_read', book_id=book.id) }}" class="times-read-form">

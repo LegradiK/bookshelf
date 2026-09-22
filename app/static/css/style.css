@@ -375,6 +375,9 @@ a { text-decoration: none; color: inherit; }
 
 .genres-wrap {
   margin: 0.5rem 0 0.5rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .genre-update-input,
@@ -1167,4 +1170,17 @@ a { text-decoration: none; color: inherit; }
   margin: 0.1rem 0 0;
   text-transform: uppercase;
   letter-spacing: 0.02em;
+}
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  margin-left: 5px;
+}
+
+.icon-btn img {
+  width: 12px;
+  height: 12px;
 }

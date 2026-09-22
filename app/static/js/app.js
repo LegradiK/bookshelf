@@ -15,8 +15,14 @@ function initBookSearch() {
   let totalItems = 0;
   const PAGE_SIZE = 40;
 
+  function normalizeQuery(str) {
+    return str
+      .normalize("NFD")               // split accented chars into base + accent mark
+      .replace(/[\u0300-\u036f]/g, ""); // strip the accent marks
+  }
+
   input.addEventListener("input", () => {
-    const query = input.value.trim();
+    const query = normalizeQuery(input.value.trim());
     clearTimeout(debounceTimer);
     resultsEl.innerHTML = "";
     removeLoadMoreButton();
@@ -235,4 +241,52 @@ function removeLoadMoreButton() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", initBookSearch);
+function initGenreFetch() {
+  const btn = document.getElementById("fetch-genres-btn");
+  if (!btn) return;
+
+  const statusEl = document.getElementById("genre-fetch-status");
+  const categoriesInput = document.querySelector(".genre-update-input");
+
+  btn.addEventListener("click", async () => {
+    const isbn = btn.dataset.isbn || "";
+    const title = btn.dataset.title || "";
+    const author = btn.dataset.author || "";
+
+    if (!isbn && !title) {
+      statusEl.textContent = "No title or ISBN to search with.";
+      return;
+    }
+
+    btn.disabled = true;
+    statusEl.textContent = "Searching...";
+
+    try {
+      const params = new URLSearchParams({ isbn, title, author });
+      const res = await fetch(`{{ url_for('library.fetch_genres') }}?${params}`);
+      const data = await res.json();
+
+      if (!data.genres || !data.genres.length) {
+        statusEl.textContent = data.message || "No genres found.";
+      } else {
+        const existing = categoriesInput.value
+          .split(",")
+          .map(s => s.trim())
+          .filter(Boolean);
+        const merged = [...new Set([...existing, ...data.genres])];
+        categoriesInput.value = merged.join(", ");
+        statusEl.textContent = `Added ${data.genres.length} genre(s).`;
+      }
+    } catch (err) {
+      statusEl.textContent = "Lookup failed. Try again.";
+    } finally {
+      btn.disabled = false;
+      setTimeout(() => { statusEl.textContent = ""; }, 3000);
+    }
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  initBookSearch();
+  initGenreFetch();
+});

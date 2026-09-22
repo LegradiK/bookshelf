@@ -54,3 +54,5 @@ reading-tracker/
   — worth adding a plain form for that later.
 - No authentication — fine for a private home network, but add a password/PIN
   gate before deploying anywhere public.
+
+<a href="https://www.flaticon.com/free-icons/magnifying-glass" title="magnifying glass icons">Magnifying glass icons created by Magnific - Flaticon</a>
