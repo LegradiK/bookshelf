@@ -49,6 +49,7 @@
     id="fetch-genres-btn"
     title="Look up genres on Open Library"
     class="icon-btn"
+    data-url="{{ url_for('library.fetch_genres') }}"
     data-isbn="{{ book.isbn or '' }}"
     data-title="{{ book.title or '' }}"
     data-author="{{ book.author or '' }}"

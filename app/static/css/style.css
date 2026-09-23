@@ -412,6 +412,11 @@ a { text-decoration: none; color: inherit; }
 .edit-icon-btn { background: none; border: none; cursor: pointer; opacity: 0.6; }
 .edit-icon-btn:hover { opacity: 1; }
 
+#genre-fetch-status {
+  margin-left: 0.5rem;
+  color: #bf822d;
+}
+
 /* ---------- Times read ---------- */
 
 .times-read-form {

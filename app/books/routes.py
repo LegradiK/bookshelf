@@ -325,10 +325,17 @@ def detail(book_id):
     """Book detail page: status, times read, and the reading log history."""
     user = User.query.get(session["user_id"])
     book = Book.query.filter_by(id=book_id, user_id=session["user_id"]).first_or_404()
+    isbn = book.isbn
+    title = book.title
+    author = book.author
+    print(isbn,title,author)
 
     return render_template(
         "book_detail.html",
         book=book,
+        isbn=isbn,
+        title=title,
+        author=author,
         logs=book.logs,
         times_read=book.times_read,
         today=date.today(),

@@ -133,59 +133,92 @@ def bookshelf():
 
 import requests
 
+OL = "https://openlibrary.org"
+
+# Generic labels that don't help as genres
+SKIP_SUBJECTS = {"readers", "media tie-in"}
+
+
+def get_ol_subjects(isbn):
+    """Edition subjects, falling back to the work's subjects via the 'works' key."""
+    try:
+        resp = requests.get(f"{OL}/isbn/{isbn}.json", timeout=5)
+        if not resp.ok:
+            return []
+        edition = resp.json()
+    except (requests.RequestException, ValueError):
+        return []
+
+    subjects = edition.get("subjects", [])
+    if subjects:
+        return subjects
+
+    works = edition.get("works", [])
+    work_key = works[0].get("key") if works else None  # e.g. "/works/OL20848685W"
+    if not work_key:
+        return []
+
+    try:
+        resp = requests.get(f"{OL}{work_key}.json", timeout=5)
+        if resp.ok:
+            return resp.json().get("subjects", [])
+    except (requests.RequestException, ValueError):
+        pass
+    return []
+
+
+def _ol_subjects_by_title(title, author):
+    params = {"title": title, "fields": "subject", "limit": 1}
+    if author:
+        params["author"] = author
+    try:
+        resp = requests.get(f"{OL}/search.json", params=params, timeout=5)
+        if resp.ok:
+            docs = resp.json().get("docs", [])
+            return docs[0].get("subject", []) if docs else []
+    except (requests.RequestException, ValueError):
+        pass
+    return []
+
+
+def _clean_subjects(subjects, cap=8):
+    cleaned, seen = [], set()
+    for s in subjects:
+        s = s.strip()
+        if not s or ":" in s:  # drops "collectionID:swOTyr" etc.
+            continue
+        if " / " in s:  # "JUVENILE FICTION / Action & Adventure" -> "Action & Adventure"
+            s = s.split(" / ")[-1]
+        s = s.removesuffix(", fiction").strip()
+        if s.isupper():
+            s = s.title()
+        key = s.lower()
+        if key in SKIP_SUBJECTS or key in seen or len(s) >= 40:
+            continue
+        seen.add(key)
+        cleaned.append(s)
+        if len(cleaned) >= cap:
+            break
+    return cleaned
+
+
 @library_bp.route("/fetch-genres")
 @login_required
 def fetch_genres():
     """Look up subjects/genres from Open Library, triggered manually by the user."""
-    isbn = request.args.get("isbn", "").strip()
+    isbn = request.args.get("isbn", "").strip().replace("-", "")
     title = request.args.get("title", "").strip()
     author = request.args.get("author", "").strip()
 
     subjects = []
-
-    # Prefer ISBN lookup — more precise, fewer false matches
     if isbn:
-        try:
-            resp = requests.get(
-                f"https://openlibrary.org/isbn/{isbn}.json",
-                timeout=5,
-            )
-            if resp.ok:
-                data = resp.json()
-                subjects = data.get("subjects", [])
-        except requests.RequestException:
-            pass
-
-    # Fallback to title/author search if ISBN lookup gave nothing
+        subjects = get_ol_subjects(isbn)
     if not subjects and title:
-        try:
-            resp = requests.get(
-                "https://openlibrary.org/search.json",
-                params={"title": title, "author": author, "limit": 1},
-                timeout=5,
-            )
-            if resp.ok:
-                docs = resp.json().get("docs", [])
-                if docs:
-                    subjects = docs[0].get("subject", [])
-        except requests.RequestException:
-            pass
+        subjects = _ol_subjects_by_title(title, author)
 
-    # Open Library subjects can be noisy/very long lists — trim and dedupe
-    cleaned = []
-    seen = set()
-    for s in subjects:
-        s_clean = s.strip()
-        key = s_clean.lower()
-        if s_clean and key not in seen and len(s_clean) < 40:
-            seen.add(key)
-            cleaned.append(s_clean)
-        if len(cleaned) >= 8:  # cap so it doesn't flood the field
-            break
-
+    cleaned = _clean_subjects(subjects)
     if not cleaned:
         return {"genres": [], "message": "No genres found on Open Library."}
-
     return {"genres": cleaned}
 
 @library_bp.route("/search")

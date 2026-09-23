@@ -263,7 +263,8 @@ function initGenreFetch() {
 
     try {
       const params = new URLSearchParams({ isbn, title, author });
-      const res = await fetch(`{{ url_for('library.fetch_genres') }}?${params}`);
+      const res = await fetch(`${btn.dataset.url}?${params}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
 
       if (!data.genres || !data.genres.length) {
@@ -275,7 +276,7 @@ function initGenreFetch() {
           .filter(Boolean);
         const merged = [...new Set([...existing, ...data.genres])];
         categoriesInput.value = merged.join(", ");
-        statusEl.textContent = `Added ${data.genres.length} genre(s).`;
+        statusEl.textContent = `Added genres: ${data.genres}` ;
       }
     } catch (err) {
       statusEl.textContent = "Lookup failed. Try again.";
