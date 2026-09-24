@@ -2,27 +2,76 @@
 {% block title %}About{% endblock %}
 
 {% block content %}
-<div class="page">
-  <h1 class="page-title">About</h1>
-  <p class="page-subtitle">A little bit about this bookshelf.</p>
+<div class="about-page">
 
-  <div class="empty-state" style="text-align: left; padding: 1.5rem 1.75rem;">
-    <p>
-      This is a place to track the books you're reading, finished, or want to read next —
-      log your star ratings, jot a quick review, and watch your reading milestones add up
-      over time.
-    </p>
-    <p>
-      Search for a book, add it to your shelf, and update its status as you go. Every book
-      you finish counts toward your next achievement badge.
-    </p>
-  </div>
+  <section class="about-hero">
+    <i class="ti ti-books about-hero-icon"></i>
+    <h1>Welcome to your reading adventure</h1>
+    <p>Every book you read is a new adventure. Keep track of them all here,
+       and see how far you can go!</p>
+  </section>
 
-  <div style="margin-top: 2rem; text-align: center;">
-    <a href="{{ url_for('auth.login') }}" class="btn-primary">Login</a>
+  <section class="about-section">
+    <h2>How it works</h2>
+    <div class="about-grid">
+      <div class="about-card">
+        <span class="about-step-number">1</span>
+        <i class="ti ti-search about-card-icon"></i>
+        <h3>Find a book</h3>
+        <p>Search for any book by its name or who wrote it.</p>
+      </div>
+      <div class="about-card">
+        <span class="about-step-number">2</span>
+        <i class="ti ti-bookmark about-card-icon"></i>
+        <h3>Add it to your shelf</h3>
+        <p>Put it on your bookshelf so you never forget it.</p>
+      </div>
+      <div class="about-card">
+        <span class="about-step-number">3</span>
+        <i class="ti ti-star about-card-icon"></i>
+        <h3>Rate and review</h3>
+        <p>Give it stars and write about your favourite part.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="about-section">
+    <h2>Your three shelves</h2>
+    <div class="about-grid">
+      <div class="about-card">
+        <i class="ti ti-heart about-card-icon"></i>
+        <h3>Want to read</h3>
+        <p>Books you can't wait to start.</p>
+      </div>
+      <div class="about-card">
+        <i class="ti ti-book-2 about-card-icon"></i>
+        <h3>Reading now</h3>
+        <p>The book you're reading at the moment.</p>
+      </div>
+      <div class="about-card">
+        <i class="ti ti-circle-check about-card-icon"></i>
+        <h3>Finished</h3>
+        <p>Well done! You can read it again any time.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="about-badges">
+    <i class="ti ti-certificate about-card-icon"></i>
+    <h2>Earn reading certificates</h2>
+    <p>Every book you finish gets you closer to your next certificate.
+       How many can you earn?</p>
+  </section>
+
+  <div class="about-cta">
+    <a href="{{ url_for('auth.login') }}" class="btn-primary">
+      Are you a member? Log in here
+    </a>
     <p class="sign-up-page-navigate">
-        No account yet? <a href="{{ url_for('auth.register') }}">Sign up</a>
+      No account yet? <a href="{{ url_for('auth.register') }}">Sign up</a>
     </p>
+
   </div>
+
 </div>
 {% endblock %}

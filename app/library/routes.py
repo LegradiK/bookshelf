@@ -53,6 +53,11 @@ def about():
     "this page explains what this web app is for"
     return render_template("about.html")
 
+@library_bp.route("/how_to")
+def how_to():
+    "this page explains how to use this web app"
+    return render_template("how_to.html")
+
 @library_bp.route("/bookshelf")
 @login_required
 def bookshelf():
@@ -218,7 +223,7 @@ def fetch_genres():
 
     cleaned = _clean_subjects(subjects)
     if not cleaned:
-        return {"genres": [], "message": "No genres found on Open Library."}
+        return {"genres": []}
     return {"genres": cleaned}
 
 @library_bp.route("/search")

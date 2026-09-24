@@ -246,7 +246,8 @@ function initGenreFetch() {
   if (!btn) return;
 
   const statusEl = document.getElementById("genre-fetch-status");
-  const categoriesInput = document.querySelector(".genre-update-input");
+  const genresForm = document.getElementById("genres-edit-form");
+  const categoriesInput = genresForm.querySelector(".genre-update-input");
 
   btn.addEventListener("click", async () => {
     const isbn = btn.dataset.isbn || "";
@@ -254,7 +255,7 @@ function initGenreFetch() {
     const author = btn.dataset.author || "";
 
     if (!isbn && !title) {
-      statusEl.textContent = "No title or ISBN to search with.";
+      showStatus("No title or ISBN to search with.");
       return;
     }
 
@@ -268,23 +269,46 @@ function initGenreFetch() {
       const data = await res.json();
 
       if (!data.genres || !data.genres.length) {
-        statusEl.textContent = data.message || "No genres found.";
-      } else {
-        const existing = categoriesInput.value
-          .split(",")
-          .map(s => s.trim())
-          .filter(Boolean);
-        const merged = [...new Set([...existing, ...data.genres])];
-        categoriesInput.value = merged.join(", ");
-        statusEl.textContent = `Added genres: ${data.genres}` ;
+        showStatus(data.message || "No genres found.");
+        return;
+      }
+
+      const existing = categoriesInput.value
+        .split(",")
+        .map(s => s.trim())
+        .filter(Boolean);
+
+      // Only offer genres the book doesn't already have (case-insensitive)
+      const seen = new Set(existing.map(g => g.toLowerCase()));
+      const newGenres = [];
+      for (const g of data.genres.map(s => s.trim()).filter(Boolean)) {
+        if (!seen.has(g.toLowerCase())) {
+          seen.add(g.toLowerCase());
+          newGenres.push(g);
+        }
+      }
+
+      if (!newGenres.length) {
+        showStatus("No new genres found.");
+        return;
+      }
+
+      statusEl.textContent = "";
+      if (confirm(`Do you want to add new genre(s): ${newGenres.join(", ")}?`)) {
+        categoriesInput.value = [...existing, ...newGenres].join(", ");
+        genresForm.submit(); // saves via books.update_genres, page reloads
       }
     } catch (err) {
-      statusEl.textContent = "Lookup failed. Try again.";
+      showStatus("Lookup failed. Try again.");
     } finally {
       btn.disabled = false;
-      setTimeout(() => { statusEl.textContent = ""; }, 3000);
     }
   });
+
+  function showStatus(message) {
+    statusEl.textContent = message;
+    setTimeout(() => { statusEl.textContent = ""; }, 3000);
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {

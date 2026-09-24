@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}How to use{% endblock %}
+
+{% block content %}
+<div class="about-page help-page">
+
+  <section class="about-hero">
+    <i class="ti ti-map-2 about-hero-icon"></i>
+    <h1>How to use your bookshelf</h1>
+    <p>Everything you need to know, one step at a time.</p>
+  </section>
+
+  <nav class="help-toc">
+    <a href="#find">Find a book</a>
+    <a href="#add">Add books</a>
+    <a href="#book-page">Your book page</a>
+    <a href="#log">Log a reading</a>
+    <a href="#certificates">Certificates</a>
+    <a href="#questions">Questions</a>
+  </nav>
+
+  <section id="find" class="help-section">
+    <h2><i class="ti ti-search"></i> Find a book or books to add to your shelf</h2>
+    <ol class="help-steps">
+      <li>Click <strong>+ Add a book</strong> on the right top corner.</li>
+      <li>Type the name of a book, or the person who wrote it, into the search box.</li>
+      <li>Wait a moment and the books will appear.</li>
+      <li>Can't see your book? Press <strong>Load more</strong> at the bottom to see more.</li>
+      <li>Then choose a reading status: <strong>Want to read</strong>, <strong>Reading now</strong> or <strong>Finished</strong>.</li>
+      <li>Press <strong>Add</strong> under the book you want.</li>
+    </ol>
+    <p class="help-tip"><i class="ti ti-bulb"></i> Want to add lots of books at once? Tick the box on each book, then press Add selected books at the bottom of the screen.</p>
+    <p class="help-tip"><i class="ti ti-bulb"></i> Choose a book that has a cover picture if you can. Books without a cover often have missing information, so things like finding genres may not work.</p>
+  </section>
+
+  <section id="book-page" class="help-section">
+    <h2><i class="ti ti-book-2"></i> Your book page</h2>
+    <p>Click on any book on your shelf to open its page. Here you can:</p>
+    <ul class="help-list">
+      <li><strong>Change its status:</strong> choose from the menu under the cover. It saves straight away.</li>
+      <li><strong>Change the genre:</strong> press the <i class="ti ti-pencil"></i> pencil, type the genres with commas between them, then press <strong>Save</strong>.</li>
+      <li><strong>Find genres for you:</strong> press the magnifying glass. If new genres are found, you'll be asked if you want to add them. Press <strong>OK</strong> to add them or <strong>Cancel</strong> to leave things as they are.</li>
+      <li><strong>Times read:</strong> once a book is marked as <strong>Finished</strong>, you can type how many times you've read it and press <strong>Save</strong>.</li>
+    </ul>
+  </section>
+
+  <section id="log" class="help-section">
+    <h2><i class="ti ti-star"></i> Log a reading and write reviews</h2>
+    <ol class="help-steps">
+      <li>On the book page, press <strong>+ Log a reading</strong>.</li>
+      <li>Check the date. It's set to today, but you can change it.</li>
+      <li>Choose how many stars to give the book, from 1 to 5.</li>
+      <li>Write what you thought if you like. What was your favourite part?</li>
+      <li>Press <strong>Save reading</strong>.</li>
+    </ol>
+    <p>Your readings appear under <strong>Reading history</strong>. To delete one,
+       press the <i class="ti ti-trash"></i> bin next to it.</p>
+  </section>
+
+<section id="certificates" class="help-section">
+  <h2><i class="ti ti-certificate"></i> Earn certificates</h2>
+  <p>Every book you finish counts towards your next reading certificate.
+     Keep reading and see how many you can earn!</p>
+  <p>To see how close you are to your next certificate, go to the
+     <a href="{{ url_for('library.achievements') }}">Achievements</a> page.
+     You can also download your newest certificate there.</p>
+</section>
+
+  <section id="questions" class="help-section">
+    <h2><i class="ti ti-help-circle"></i> Questions</h2>
+
+    <details class="help-faq">
+      <summary>I pressed Add but nothing happened.</summary>
+      <p>Check that you've chosen a reading status first. Books can't be added without one.</p>
+    </details>
+
+    <details class="help-faq">
+    <summary>How do I take a book off my shelf?</summary>
+    <p>There are three ways:</p>
+    <ul class="help-list">
+        <li><strong>From the book's page:</strong> press <strong>Remove from shelf</strong> at the bottom.</li>
+        <li><strong>From your bookshelf:</strong> press the <i class="ti ti-trash"></i> bin in the bottom right corner of the book.</li>
+        <li><strong>Lots of books at once:</strong> tick the box on each book, then press <strong>Delete selected</strong> at the bottom of the screen.</li>
+    </ul>
+    <p>Don't worry, you'll always be asked to check before anything is removed.</p>
+    </details>
+
+    <details class="help-faq">
+      <summary>Can I read a book more than once?</summary>
+      <p>Yes! Log a new reading each time. You can give it different stars and a new review.</p>
+    </details>
+
+    <details class="help-faq">
+      <summary>The book has no cover picture.</summary>
+      <p>Some books don't have a cover online, so you'll see the first letter of the title instead.
+         These books often have other information missing too. When you search, try to pick
+         a version of the book that has a cover.</p>
+    </details>
+  </section>
+
+  <div class="about-cta">
+    <a href="{{ url_for('library.bookshelf') }}" class="btn-primary">Go to my bookshelf</a>
+  </div>
+
+</div>
+{% endblock %}

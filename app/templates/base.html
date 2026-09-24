@@ -25,13 +25,14 @@
           <span class="logo-icon"></span>
         </button>
         <a href="{{ url_for('library.bookshelf') }}" class="logo-text">My Bookshelf</a>
+        <a href="{{ url_for('library.how_to') }}" class="how-to-btn">How to</a> 
       </div>
       <div class="user-name">
         {% if session.get('user_id') %}
         Welcome, {{ user_name }}
         {% endif %}
       </div>
-      <nav class="site-nav">
+      <nav class="site-nav"> 
         {% if session.get('user_id') %}
           <a href="{{ url_for('library.achievements') }}" class="btn-pill">Achievements</a> 
           <a href="{{ url_for('library.search_page') }}" class="nav-cta">+ Add a book</a>

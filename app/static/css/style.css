@@ -98,6 +98,17 @@ a { text-decoration: none; color: inherit; }
   border-radius: 999px;
 }
 
+.how-to-btn {
+  margin-left: 1.25rem;
+  background: var(--primary);
+  color: white !important;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 15px;
+  font-family: var(--font-body);
+}
+
 /* ---------- Page ---------- */
 .page-bg {
   flex: 1;
@@ -164,6 +175,202 @@ a { text-decoration: none; color: inherit; }
   white-space: normal; 
   text-align: right;
 }
+
+/* ---------- About page ---------- */
+.about-page {
+  --about-accent: #6c7ae0;        /* change to your main theme colour */
+  --about-card-bg: #ffffff;
+  --about-border: #e6e8ef;
+  --about-text: #2f3342;
+  --about-muted: #6b7080;
+
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+  text-align: center;
+  color: var(--about-text);
+}
+
+.about-hero {
+  padding: 2rem 1rem 1rem;
+  margin-bottom: 2rem;
+}
+.about-hero h1 {
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  margin: 0.6rem 0;
+}
+.about-hero p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: var(--about-muted);
+  max-width: 540px;
+  margin: 0 auto;
+}
+.about-hero-icon {
+  font-size: 2.8rem;
+  color: var(--about-accent);
+}
+
+.about-section { margin-bottom: 2.5rem; }
+.about-section h2,
+.about-badges h2 {
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.about-card {
+  position: relative;
+  background: var(--about-card-bg);
+  border: 1px solid var(--about-border);
+  border-radius: 16px;
+  padding: 1.6rem 1.2rem 1.3rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.about-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+.about-card h3 {
+  font-size: 1.15rem;
+  margin: 0.5rem 0 0.4rem;
+}
+.about-card p {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--about-muted);
+  margin: 0;
+}
+
+.about-card-icon {
+  font-size: 2rem;
+  color: var(--about-accent);
+}
+
+.about-step-number {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--about-accent);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-badges {
+  background: var(--about-card-bg);
+  border: 1px solid var(--about-border);
+  border-radius: 16px;
+  padding: 1.8rem 1.5rem;
+  margin-bottom: 2rem;
+}
+.about-badges p {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--about-muted);
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-card:hover { transform: none; }
+}
+
+/* ---------- How to page ---------- */
+
+.help-page { text-align: left; }
+.help-page .about-hero,
+.help-page .about-cta { text-align: center; }
+
+.help-toc {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+.help-toc a {
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--about-border);
+  border-radius: 999px;
+  color: var(--about-text);
+  text-decoration: none;
+  font-size: 0.95rem;
+  background: var(--about-card-bg);
+}
+.help-toc a:hover {
+  border-color: var(--about-accent);
+  color: var(--about-accent);
+}
+
+.help-section {
+  background: var(--about-card-bg);
+  border: 1px solid var(--about-border);
+  border-radius: 16px;
+  padding: 1.5rem 1.6rem;
+  margin-bottom: 1.2rem;
+  scroll-margin-top: 1rem;
+}
+.help-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.3rem;
+  margin: 0 0 1rem;
+}
+.help-section h2 .ti { color: var(--about-accent); }
+.help-section p,
+.help-section li {
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.help-steps { padding-left: 1.3rem; margin: 0 0 1rem; }
+.help-steps li,
+.help-list li { margin-bottom: 0.5rem; }
+.help-list { padding-left: 1.2rem; margin: 0; }
+
+.help-tip {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  background: #f5f6fb;
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+  margin: 0;
+  color: var(--about-muted);
+}
+.help-tip .ti { color: var(--about-accent); font-size: 1.2rem; }
+
+.help-faq {
+  border-top: 1px solid var(--about-border);
+  padding: 0.8rem 0;
+}
+.help-faq:last-of-type { border-bottom: 1px solid var(--about-border); }
+.help-faq summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+.help-faq p {
+  margin: 0.6rem 0 0;
+  color: var(--about-muted);
+}
+
+.help-tip + .help-tip { margin-top: 0.6rem; }
+
+.help-faq .help-list { margin-top: 0.5rem; }
 
 /* ---------- Login page ---------- */
 .welcome-message {
@@ -249,7 +456,12 @@ a { text-decoration: none; color: inherit; }
 .book-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 .book-cover-placeholder {
-  width: 100%; height: 100%;
+  position: relative;
+  aspect-ratio: 2 / 3;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--tint-secondary);
+  margin-bottom: 0.5rem;
   display: flex; align-items: center; justify-content: center;
   font-family: var(--font-display);
   font-size: 40px;
